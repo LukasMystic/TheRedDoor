@@ -1,0 +1,754 @@
+fileFormatVersion: 2
+guid: 1b1916ac9617e40c5af61b10d117a5d6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5782873294790705833
+    second: Moss Guardian_Attack2_export_Image Frames Animation_0
+  - first:
+      213: 9195934647172581846
+    second: Moss Guardian_Attack2_export_Image Frames Animation_1
+  - first:
+      213: -1798652693558719636
+    second: Moss Guardian_Attack2_export_Image Frames Animation_2
+  - first:
+      213: -53725739245458951
+    second: Moss Guardian_Attack2_export_Image Frames Animation_3
+  - first:
+      213: -8499110250746918264
+    second: Moss Guardian_Attack2_export_Image Frames Animation_4
+  - first:
+      213: 1919759821420437799
+    second: Moss Guardian_Attack2_export_Image Frames Animation_5
+  - first:
+      213: -6366927910471748848
+    second: Moss Guardian_Attack2_export_Image Frames Animation_6
+  - first:
+      213: -6136726563110850134
+    second: Moss Guardian_Attack2_export_Image Frames Animation_7
+  - first:
+      213: 8747752970275011923
+    second: Moss Guardian_Attack2_export_Image Frames Animation_8
+  - first:
+      213: -3341275229680543671
+    second: Moss Guardian_Attack2_export_Image Frames Animation_9
+  - first:
+      213: 78864041743805793
+    second: Moss Guardian_Attack2_export_Image Frames Animation_10
+  - first:
+      213: 5014507872687373334
+    second: Moss Guardian_Attack2_export_Image Frames Animation_11
+  - first:
+      213: -5932322137319000697
+    second: Moss Guardian_Attack2_export_Image Frames Animation_12
+  - first:
+      213: -2630081185560410212
+    second: Moss Guardian_Attack2_export_Image Frames Animation_13
+  - first:
+      213: -5898492832271382697
+    second: Moss Guardian_Attack2_export_Image Frames Animation_14
+  - first:
+      213: -5276343726014729823
+    second: Moss Guardian_Attack2_export_Image Frames Animation_15
+  - first:
+      213: -6889830858103059076
+    second: Moss Guardian_Attack2_export_Image Frames Animation_16
+  - first:
+      213: 7408966152937292682
+    second: Moss Guardian_Attack2_export_Image Frames Animation_17
+  - first:
+      213: -2474399152102540380
+    second: Moss Guardian_Attack2_export_Image Frames Animation_18
+  - first:
+      213: -6327311607248083864
+    second: Moss Guardian_Attack2_export_Image Frames Animation_19
+  - first:
+      213: -8646824557950997850
+    second: Moss Guardian_Attack2_export_Image Frames Animation_20
+  - first:
+      213: 8804865052319050850
+    second: Moss Guardian_Attack2_export_Image Frames Animation_21
+  - first:
+      213: 8526155487983910772
+    second: Moss Guardian_Attack2_export_Image Frames Animation_22
+  - first:
+      213: 5129127215032629828
+    second: Moss Guardian_Attack2_export_Image Frames Animation_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_0
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 1044
+        width: 106
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75d38ea906b1fbfa0800000000000000
+      internalID: -5782873294790705833
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_1
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 1042
+        width: 93
+        height: 161
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d9cd66e6d58e9f70800000000000000
+      internalID: 9195934647172581846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_2
+      rect:
+        serializedVersion: 2
+        x: 609
+        y: 1041
+        width: 98
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6b0226a7e6e907e0800000000000000
+      internalID: -1798652693558719636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_3
+      rect:
+        serializedVersion: 2
+        x: 863
+        y: 1040
+        width: 95
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f9aafc89b0214ff0800000000000000
+      internalID: -53725739245458951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_4
+      rect:
+        serializedVersion: 2
+        x: 1130
+        y: 1041
+        width: 88
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88a4955d1481d0a80800000000000000
+      internalID: -8499110250746918264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_5
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 785
+        width: 82
+        height: 147
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72125d1e26b54aa10800000000000000
+      internalID: 1919759821420437799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_6
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 786
+        width: 92
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 013bfc18cc024a7a0800000000000000
+      internalID: -6366927910471748848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_7
+      rect:
+        serializedVersion: 2
+        x: 610
+        y: 785
+        width: 96
+        height: 179
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa1f21264b7f5daa0800000000000000
+      internalID: -6136726563110850134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_8
+      rect:
+        serializedVersion: 2
+        x: 861
+        y: 787
+        width: 97
+        height: 222
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35d3c189af2466970800000000000000
+      internalID: 8747752970275011923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_9
+      rect:
+        serializedVersion: 2
+        x: 1061
+        y: 784
+        width: 153
+        height: 203
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9485416a1e761a1d0800000000000000
+      internalID: -3341275229680543671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_10
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 528
+        width: 136
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16de0b99d6e281100800000000000000
+      internalID: 78864041743805793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_11
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 527
+        width: 138
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61c3eea975c179540800000000000000
+      internalID: 5014507872687373334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_12
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 520
+        width: 139
+        height: 85
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7853ae762782cada0800000000000000
+      internalID: -5932322137319000697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_13
+      rect:
+        serializedVersion: 2
+        x: 837
+        y: 518
+        width: 129
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c97cb34b813108bd0800000000000000
+      internalID: -2630081185560410212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_14
+      rect:
+        serializedVersion: 2
+        x: 1099
+        y: 522
+        width: 120
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 757c6464508542ea0800000000000000
+      internalID: -5898492832271382697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_15
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 271
+        width: 117
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a1f7022659a6c6b0800000000000000
+      internalID: -5276343726014729823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_16
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 271
+        width: 116
+        height: 112
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7d0e34a6576260a0800000000000000
+      internalID: -6889830858103059076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_17
+      rect:
+        serializedVersion: 2
+        x: 581
+        y: 271
+        width: 119
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8348b2367fe1d660800000000000000
+      internalID: 7408966152937292682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_18
+      rect:
+        serializedVersion: 2
+        x: 837
+        y: 271
+        width: 118
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ab7662c41b29add0800000000000000
+      internalID: -2474399152102540380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_19
+      rect:
+        serializedVersion: 2
+        x: 1095
+        y: 272
+        width: 116
+        height: 147
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 864a5c2ed9fd038a0800000000000000
+      internalID: -6327311607248083864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_20
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 17
+        width: 115
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6aae43c90ee400880800000000000000
+      internalID: -8646824557950997850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_21
+      rect:
+        serializedVersion: 2
+        x: 337
+        y: 19
+        width: 112
+        height: 165
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26c6aba6d1a213a70800000000000000
+      internalID: 8804865052319050850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_22
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 19
+        width: 108
+        height: 171
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47f37092e3df25670800000000000000
+      internalID: 8526155487983910772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Attack2_export_Image Frames Animation_23
+      rect:
+        serializedVersion: 2
+        x: 859
+        y: 19
+        width: 106
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44afecbd6025e2740800000000000000
+      internalID: 5129127215032629828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Moss Guardian_Attack2_export_Image Frames Animation_0: -5782873294790705833
+      Moss Guardian_Attack2_export_Image Frames Animation_1: 9195934647172581846
+      Moss Guardian_Attack2_export_Image Frames Animation_10: 78864041743805793
+      Moss Guardian_Attack2_export_Image Frames Animation_11: 5014507872687373334
+      Moss Guardian_Attack2_export_Image Frames Animation_12: -5932322137319000697
+      Moss Guardian_Attack2_export_Image Frames Animation_13: -2630081185560410212
+      Moss Guardian_Attack2_export_Image Frames Animation_14: -5898492832271382697
+      Moss Guardian_Attack2_export_Image Frames Animation_15: -5276343726014729823
+      Moss Guardian_Attack2_export_Image Frames Animation_16: -6889830858103059076
+      Moss Guardian_Attack2_export_Image Frames Animation_17: 7408966152937292682
+      Moss Guardian_Attack2_export_Image Frames Animation_18: -2474399152102540380
+      Moss Guardian_Attack2_export_Image Frames Animation_19: -6327311607248083864
+      Moss Guardian_Attack2_export_Image Frames Animation_2: -1798652693558719636
+      Moss Guardian_Attack2_export_Image Frames Animation_20: -8646824557950997850
+      Moss Guardian_Attack2_export_Image Frames Animation_21: 8804865052319050850
+      Moss Guardian_Attack2_export_Image Frames Animation_22: 8526155487983910772
+      Moss Guardian_Attack2_export_Image Frames Animation_23: 5129127215032629828
+      Moss Guardian_Attack2_export_Image Frames Animation_3: -53725739245458951
+      Moss Guardian_Attack2_export_Image Frames Animation_4: -8499110250746918264
+      Moss Guardian_Attack2_export_Image Frames Animation_5: 1919759821420437799
+      Moss Guardian_Attack2_export_Image Frames Animation_6: -6366927910471748848
+      Moss Guardian_Attack2_export_Image Frames Animation_7: -6136726563110850134
+      Moss Guardian_Attack2_export_Image Frames Animation_8: 8747752970275011923
+      Moss Guardian_Attack2_export_Image Frames Animation_9: -3341275229680543671
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
