@@ -347,7 +347,7 @@ MonoBehaviour:
   damage: 1
   targetLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   windupDuration: 0.12
   activeDuration: 0.12
   attackCooldown: 0.4
