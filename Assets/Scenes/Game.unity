@@ -160,12 +160,12 @@ MonoBehaviour:
   coyoteTime: 0.12
   jumpBufferDuration: 0.12
   jumpCutMultiplier: 0.5
-  groundCheck: {fileID: 361076034}
+  groundCheck: {fileID: 653430584}
   groundCheckSize: {x: 0.6, y: 0.12}
   groundLayer:
     serializedVersion: 2
-    m_Bits: 0
-  facingRoot: {fileID: 361076034}
+    m_Bits: 8
+  facingRoot: {fileID: 1192353282}
   actionMapName: Player
   moveActionName: Move
   jumpActionName: Jump
