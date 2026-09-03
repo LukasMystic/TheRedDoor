@@ -43,11 +43,12 @@ namespace TheRedDoor.Player
         private float moveInput;
         private float coyoteTimer;
         private float jumpBufferTimer;
+        private float knockbackEndTime;
         private bool jumpCutRequested;
         private bool controlsEnabled = true;
         private bool isFacingRight = true;
 
-        public bool ControlsEnabled => controlsEnabled;
+        public bool ControlsEnabled => controlsEnabled && Time.time >= knockbackEndTime;
         public bool IsGrounded { get; private set; }
         public bool IsFacingRight => isFacingRight;
         public float HorizontalInput => moveInput;
@@ -84,7 +85,7 @@ namespace TheRedDoor.Player
 
         private void Update()
         {
-            if (!controlsEnabled)
+            if (!ControlsEnabled)
             {
                 moveInput = 0f;
                 return;
@@ -110,7 +111,11 @@ namespace TheRedDoor.Player
             IsGrounded = CheckGrounded();
             UpdateJumpTimers();
 
-            if (controlsEnabled)
+            // Let physics carry the hit's velocity until the short stun ends.
+            if (Time.time < knockbackEndTime)
+                return;
+
+            if (ControlsEnabled)
             {
                 TryJump();
                 ApplyJumpCut();
@@ -126,9 +131,20 @@ namespace TheRedDoor.Player
             if (!value)
             {
                 moveInput = 0f;
+                coyoteTimer = 0f;
                 jumpBufferTimer = 0f;
                 jumpCutRequested = false;
             }
+        }
+
+        public void ApplyKnockback(Vector2 velocity, float duration)
+        {
+            moveInput = 0f;
+            coyoteTimer = 0f;
+            jumpBufferTimer = 0f;
+            jumpCutRequested = false;
+            knockbackEndTime = Time.time + Mathf.Max(Time.fixedDeltaTime, duration);
+            body.linearVelocity = velocity;
         }
 
         private void ApplyHorizontalMovement()

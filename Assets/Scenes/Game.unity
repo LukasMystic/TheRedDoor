@@ -119,6 +119,40 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &361076029 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3242269044723518385, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
+  m_PrefabInstance: {fileID: 5725785860005943220}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &361076036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361076029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d341fde6d6e64d66a2cd7dc0e9ba3470, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Player.PlayerHealth
+  maxHealth: 5
+  currentHealth: 0
+  invulnerabilityDuration: 0.8
+  knockbackVelocity: {x: 6, y: 4}
+  knockbackDuration: 0.18
+  spriteRenderer: {fileID: 1192353283}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.12
+  onHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDamaged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDied:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,6 +374,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &1192353283 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 1897977767935321957, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
+  m_PrefabInstance: {fileID: 5725785860005943220}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1837442639
 GameObject:
   m_ObjectHideFlags: 0
@@ -695,7 +734,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3242269044723518385, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 361076036}
   m_SourcePrefab: {fileID: 100100000, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
