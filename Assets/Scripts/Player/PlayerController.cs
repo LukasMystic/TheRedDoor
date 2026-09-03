@@ -63,6 +63,8 @@ namespace TheRedDoor.Player
         private bool isFacingRight = true;
 
         public bool ControlsEnabled => controlsEnabled && !IsDashing && Time.time >= knockbackEndTime;
+        // Distinguishes death/ending locks from temporary dash and knockback restrictions.
+        public bool IsControlLocked => !controlsEnabled;
         public bool IsGrounded { get; private set; }
         public bool IsDashing { get; private set; }
         public bool HasDashInvulnerability => isActiveAndEnabled && IsDashing && invulnerableDuringDash;

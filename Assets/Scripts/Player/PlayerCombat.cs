@@ -25,6 +25,8 @@ namespace TheRedDoor.Player
 
         [Header("Input")]
         [SerializeField] private string attackActionPath = "Player/Attack";
+        [Tooltip("Remember one fresh press briefly while dash, hit-stun, a swing or cooldown finishes. Holding J never repeats.")]
+        [SerializeField, Min(0f)] private float attackBufferDuration = 0.35f;
 
         [Header("Animation Hooks (Optional)")]
         [Tooltip("Can trigger the real attack animation once an Animator is configured.")]
@@ -36,18 +38,32 @@ namespace TheRedDoor.Player
         private readonly List<Collider2D> overlaps = new(8);
         private readonly HashSet<BossHealth> hitTargets = new();
         private PlayerController controller;
+        private PlayerInput playerInput;
         private InputAction attackAction;
         private AttackState state;
         private float stateTimeRemaining;
         private float nextAttackTime;
+        private bool hasBufferedAttack;
+        private float bufferedAttackUntil;
 
         public bool IsAttacking => state != AttackState.Ready;
         public bool IsHitboxActive => state == AttackState.Active;
 
+        private bool CanReadAttackInput => Application.isPlaying && isActiveAndEnabled &&
+            controller != null && controller.isActiveAndEnabled && !controller.IsControlLocked &&
+            playerInput != null && playerInput.isActiveAndEnabled && playerInput.inputIsActive &&
+            attackAction != null && attackAction.enabled && attackPoint != null && Time.timeScale > 0f;
+
         private void Awake()
         {
             controller = GetComponent<PlayerController>();
-            InputActionAsset actions = GetComponent<PlayerInput>().actions;
+            playerInput = GetComponent<PlayerInput>();
+        }
+
+        private void Start()
+        {
+            // Borrow PlayerInput's initialized action, just like dash and door interaction.
+            InputActionAsset actions = playerInput.actions;
             attackAction = actions != null ? actions.FindAction(attackActionPath) : null;
 
             if (attackPoint == null || attackAction == null)
@@ -61,36 +77,62 @@ namespace TheRedDoor.Player
                 Debug.LogWarning("PlayerCombat Target Layers is Nothing; attacks will not hit any targets until a layer is selected.", this);
         }
 
-        private void OnEnable()
-        {
-            attackAction?.Enable();
-        }
-
         private void OnDisable()
         {
-            attackAction?.Disable();
+            // PlayerInput owns the action's lifetime; disabling combat must not disable its map.
+            ClearBufferedAttack();
             FinishAttack();
         }
 
         private void Update()
         {
-            if (!controller.isActiveAndEnabled || !controller.ControlsEnabled)
+            if (!CanReadAttackInput)
             {
+                ClearBufferedAttack();
                 FinishAttack();
                 return;
             }
 
             if (attackAction.WasPressedThisFrame())
-                TryAttack();
+            {
+                hasBufferedAttack = true;
+                bufferedAttackUntil = Time.time + Mathf.Max(0f, attackBufferDuration);
+            }
+        }
+
+        private void LateUpdate()
+        {
+            // All movement Update calls have run: simultaneous Shift + J gives dash priority,
+            // and a direction change has already positioned the attack point correctly.
+            if (!CanReadAttackInput)
+            {
+                ClearBufferedAttack();
+                FinishAttack();
+                return;
+            }
+
+            if (!controller.ControlsEnabled)
+                FinishAttack(); // Cancel the swing, but preserve a fresh, unexpired queued press.
+
+            if (!hasBufferedAttack)
+                return;
+
+            if (Time.time > bufferedAttackUntil)
+            {
+                ClearBufferedAttack();
+                return;
+            }
+
+            TryAttack();
         }
 
         public bool TryAttack()
         {
-            if (!isActiveAndEnabled || controller == null || !controller.isActiveAndEnabled ||
-                !controller.ControlsEnabled || attackPoint == null || Time.timeScale <= 0f ||
+            if (!CanReadAttackInput || !controller.ControlsEnabled ||
                 IsAttacking || Time.time < nextAttackTime)
                 return false;
 
+            ClearBufferedAttack(); // Consume before callbacks so this press cannot start twice.
             state = AttackState.Windup;
             stateTimeRemaining = Mathf.Max(0f, windupDuration);
             nextAttackTime = Time.time + Mathf.Max(0f, attackCooldown);
@@ -101,10 +143,17 @@ namespace TheRedDoor.Player
 
         private void FixedUpdate()
         {
+            if (!CanReadAttackInput)
+            {
+                ClearBufferedAttack();
+                FinishAttack();
+                return;
+            }
+
             if (!IsAttacking)
                 return;
 
-            if (!controller.isActiveAndEnabled || !controller.ControlsEnabled || attackPoint == null)
+            if (!controller.ControlsEnabled)
             {
                 FinishAttack();
                 return;
@@ -135,7 +184,7 @@ namespace TheRedDoor.Player
             // A target may have several colliders or remain in range for multiple physics steps.
             for (int i = 0; i < overlaps.Count; i++)
             {
-                if (!IsHitboxActive || !controller.ControlsEnabled)
+                if (!IsHitboxActive || !CanReadAttackInput || !controller.ControlsEnabled)
                     break;
 
                 Collider2D hit = overlaps[i];
@@ -146,6 +195,12 @@ namespace TheRedDoor.Player
                 if (health != null && health.isActiveAndEnabled && !health.IsDefeated && hitTargets.Add(health))
                     health.TakeDamage(Mathf.Max(1, damage));
             }
+        }
+
+        private void ClearBufferedAttack()
+        {
+            hasBufferedAttack = false;
+            bufferedAttackUntil = 0f;
         }
 
         private void FinishAttack()
