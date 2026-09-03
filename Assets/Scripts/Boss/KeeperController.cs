@@ -49,6 +49,25 @@ namespace TheRedDoor.Boss
         [SerializeField, Min(0.01f)] private float slamActiveDuration = 0.2f;
         [SerializeField, Min(0.01f)] private float slamRecoveryDuration = 1.6f;
 
+        [Header("Heavy Strike")]
+        [SerializeField] private bool heavyStrikeEnabled = true;
+        [Tooltip("Number of other attacks before a heavy strike becomes available, including slams.")]
+        [SerializeField, Min(1)] private int attacksBetweenHeavyStrikes = 3;
+        [SerializeField, Min(0.01f)] private float heavyActivationRange = 4.5f;
+        [SerializeField, Min(0.01f)] private float heavyTelegraphDuration = 1f;
+        [Tooltip("A short grounded step toward the player's position when the warning began. No contact damage.")]
+        [SerializeField, Min(0f)] private float heavyStepDistance = 2f;
+        [SerializeField, Min(0.01f)] private float heavyStepSpeed = 5f;
+        [SerializeField, Min(0f)] private float heavyStoppingDistance = 1.2f;
+        [Tooltip("Stationary warning after the step, before the hit becomes active.")]
+        [SerializeField, Min(0.01f)] private float heavyWindupDuration = 0.35f;
+        [SerializeField, Min(0.01f)] private float heavyActiveDuration = 0.18f;
+        [SerializeField, Min(0.01f)] private float heavyRecoveryDuration = 2f;
+        [SerializeField, Min(1)] private int heavyDamage = 2;
+        [Tooltip("World-space forward hitbox offset, mirrored with locked facing.")]
+        [SerializeField] private Vector2 heavyHitboxOffset = new(1.1f, 0f);
+        [SerializeField] private Vector2 heavyHitboxSize = new(2.2f, 1.8f);
+
         [Header("Flat Arena Limits")]
         [Tooltip("World X limits for the boss ROOT, leaving room for its collider inside the floor edges.")]
         [SerializeField] private Vector2 arenaXLimits = new(-6.5f, 6.5f);
@@ -64,8 +83,14 @@ namespace TheRedDoor.Boss
         [SerializeField] private Color chargeColor = new(0.75f, 0.3f, 1f, 1f);
         [SerializeField] private Color slamTelegraphColor = new(0.7f, 1f, 0.15f, 1f);
         [SerializeField] private Color slamColor = new(0.2f, 1f, 0.4f, 1f);
+        [SerializeField] private Color heavyTelegraphColor = new(1f, 0.5f, 0.8f, 1f);
+        [SerializeField] private Color heavyStrikeColor = new(0.85f, 0f, 0.45f, 1f);
 
-        public enum State { Idle, Telegraph, Swipe, Recovery, Defeated, ChargeTelegraph, Charge, SlamTelegraph, Slam }
+        public enum State
+        {
+            Idle, Telegraph, Swipe, Recovery, Defeated, ChargeTelegraph, Charge, SlamTelegraph, Slam,
+            HeavyTelegraph, HeavyAdvance, HeavyWindup, HeavyStrike
+        }
         public State CurrentState { get; private set; }
         public bool IsFacingRight => facingDirection > 0f;
 
@@ -83,11 +108,18 @@ namespace TheRedDoor.Boss
         private bool finishChargeAfterStep;
         private int attacksSinceSlam;
         private GroundShockwave activeShockwave;
+        private int attacksSinceHeavyStrike;
+        private float heavyDestinationX;
+        private bool finishHeavyAdvanceAfterStep;
 
         private Vector2 HitboxCenter => (Vector2)transform.position +
             new Vector2(Mathf.Abs(hitboxOffset.x) * facingDirection, hitboxOffset.y);
         private Vector2 HitboxSize => new(
             Mathf.Max(0.01f, hitboxSize.x), Mathf.Max(0.01f, hitboxSize.y));
+        private Vector2 HeavyHitboxCenter => (Vector2)transform.position +
+            new Vector2(Mathf.Abs(heavyHitboxOffset.x) * facingDirection, heavyHitboxOffset.y);
+        private Vector2 HeavyHitboxSize => new(
+            Mathf.Max(0.01f, heavyHitboxSize.x), Mathf.Max(0.01f, heavyHitboxSize.y));
 
         private void Awake()
         {
@@ -138,6 +170,7 @@ namespace TheRedDoor.Boss
                 target.Died.AddListener(HandleTargetDeath);
             preferCharge = false;
             attacksSinceSlam = 0;
+            attacksSinceHeavyStrike = 0;
             SetState(State.Idle);
         }
 
@@ -211,6 +244,20 @@ namespace TheRedDoor.Boss
                     Mathf.Abs(distance.y) <= Mathf.Max(0f, maxVerticalDistance))
                 {
                     hitAttempted = false;
+                    if (heavyStrikeEnabled && horizontalDistance <= Mathf.Max(0.01f, heavyActivationRange) &&
+                        attacksSinceHeavyStrike >= Mathf.Max(1, attacksBetweenHeavyStrikes))
+                    {
+                        attacksSinceHeavyStrike = 0;
+                        float step = Mathf.Min(Mathf.Max(0f, heavyStepDistance),
+                            Mathf.Max(0f, horizontalDistance - Mathf.Max(0f, heavyStoppingDistance)));
+                        heavyDestinationX = Mathf.Clamp(body.position.x + facingDirection * step,
+                            arenaXLimits.x, arenaXLimits.y);
+                        SetState(State.HeavyTelegraph, heavyTelegraphDuration);
+                        return;
+                    }
+
+                    if (attacksSinceHeavyStrike < Mathf.Max(1, attacksBetweenHeavyStrikes))
+                        attacksSinceHeavyStrike++;
                     if (shockwavePrefab != null && attacksSinceSlam >= Mathf.Max(1, attacksBetweenSlams))
                     {
                         attacksSinceSlam = 0;
@@ -228,7 +275,8 @@ namespace TheRedDoor.Boss
             }
 
             if (CurrentState == State.Telegraph || CurrentState == State.ChargeTelegraph ||
-                CurrentState == State.SlamTelegraph || CurrentState == State.Recovery)
+                CurrentState == State.SlamTelegraph || CurrentState == State.HeavyTelegraph ||
+                CurrentState == State.HeavyWindup || CurrentState == State.Recovery)
             {
                 stateTimeRemaining -= Time.fixedDeltaTime;
                 if (stateTimeRemaining > 0f)
@@ -245,6 +293,14 @@ namespace TheRedDoor.Boss
                     SetState(State.Slam, slamActiveDuration);
                     SpawnShockwave();
                 }
+                else if (CurrentState == State.HeavyTelegraph)
+                {
+                    SetState(State.HeavyAdvance);
+                }
+                else if (CurrentState == State.HeavyWindup)
+                {
+                    SetState(State.HeavyStrike, heavyActiveDuration);
+                }
                 else
                 {
                     bool isCharge = CurrentState == State.ChargeTelegraph;
@@ -255,6 +311,23 @@ namespace TheRedDoor.Boss
             if (CurrentState == State.Charge)
             {
                 UpdateCharge();
+                return;
+            }
+
+            if (CurrentState == State.HeavyAdvance)
+            {
+                UpdateHeavyAdvance();
+                return;
+            }
+
+            if (CurrentState == State.HeavyStrike)
+            {
+                CheckHeavyHit();
+                if (CurrentState != State.HeavyStrike)
+                    return; // A lethal damage callback may already have cancelled the attack.
+                stateTimeRemaining -= Time.fixedDeltaTime;
+                if (stateTimeRemaining <= 0f)
+                    SetState(State.Recovery, heavyRecoveryDuration);
                 return;
             }
 
@@ -296,6 +369,59 @@ namespace TheRedDoor.Boss
             }
 
             float skin = Mathf.Max(0.001f, collisionSkin);
+            RaycastHit2D nearest = FindForwardObstacle(direction, distance, skin);
+
+            if (nearest.collider != null)
+            {
+                distance = Mathf.Min(distance, Mathf.Max(0f, nearest.distance - skin));
+                finishChargeAfterStep = true;
+                if (!hitAttempted && nearest.collider.GetComponentInParent<PlayerHealth>() == target)
+                {
+                    // One contact attempt, even if a well-timed player dash rejects the damage.
+                    hitAttempted = true;
+                    target.TakeDamage(Mathf.Max(1, chargeDamage), transform.position);
+                    // Death or a damage listener may cancel the encounter immediately.
+                    if (!isActiveAndEnabled || CurrentState != State.Charge)
+                        return;
+                }
+            }
+
+            body.MovePosition(body.position + direction * distance);
+            stateTimeRemaining -= Time.fixedDeltaTime;
+            finishChargeAfterStep |= distance >= distanceToLimit;
+            // Recovery starts next physics step, after this final bounded movement has happened.
+        }
+
+        private void UpdateHeavyAdvance()
+        {
+            float remaining = Mathf.Max(0f, (heavyDestinationX - body.position.x) * facingDirection);
+            if (finishHeavyAdvanceAfterStep || remaining <= 0.001f)
+            {
+                SetState(State.HeavyWindup, heavyWindupDuration);
+                return;
+            }
+
+            Vector2 direction = new(facingDirection, 0f);
+            float limit = IsFacingRight ? arenaXLimits.y : arenaXLimits.x;
+            float distanceToLimit = Mathf.Max(0f, (limit - body.position.x) * facingDirection);
+            float distance = Mathf.Min(remaining, Mathf.Min(distanceToLimit,
+                Mathf.Max(0.01f, heavyStepSpeed) * Time.fixedDeltaTime));
+            float skin = Mathf.Max(0.001f, collisionSkin);
+            RaycastHit2D nearest = FindForwardObstacle(direction, distance, skin);
+            if (nearest.collider != null)
+            {
+                distance = Mathf.Min(distance, Mathf.Max(0f, nearest.distance - skin));
+                finishHeavyAdvanceAfterStep = true;
+            }
+
+            // The step is harmless, including when it stops against the player's solid body.
+            body.MovePosition(body.position + direction * distance);
+            finishHeavyAdvanceAfterStep |= distance >= remaining || distance >= distanceToLimit;
+            // Let this move reach physics before starting the stationary warning next step.
+        }
+
+        private RaycastHit2D FindForwardObstacle(Vector2 direction, float distance, float skin)
+        {
             ContactFilter2D filter = new() { useTriggers = false };
             filter.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
             bodyCollider.Cast(direction, filter, chargeHits, distance + skin);
@@ -322,25 +448,7 @@ namespace TheRedDoor.Boss
                 }
             }
 
-            if (nearest.collider != null)
-            {
-                distance = Mathf.Min(distance, Mathf.Max(0f, nearestDistance - skin));
-                finishChargeAfterStep = true;
-                if (!hitAttempted && nearest.collider.GetComponentInParent<PlayerHealth>() == target)
-                {
-                    // One contact attempt, even if a well-timed player dash rejects the damage.
-                    hitAttempted = true;
-                    target.TakeDamage(Mathf.Max(1, chargeDamage), transform.position);
-                    // Death or a damage listener may cancel the encounter immediately.
-                    if (!isActiveAndEnabled || CurrentState != State.Charge)
-                        return;
-                }
-            }
-
-            body.MovePosition(body.position + direction * distance);
-            stateTimeRemaining -= Time.fixedDeltaTime;
-            finishChargeAfterStep |= distance >= distanceToLimit;
-            // Recovery starts next physics step, after this final bounded movement has happened.
+            return nearest;
         }
 
         private void CheckSwipeHit()
@@ -361,6 +469,32 @@ namespace TheRedDoor.Boss
                 hitAttempted = true;
                 target.TakeDamage(Mathf.Max(1, damage), transform.position);
                 break;
+            }
+        }
+
+        private void CheckHeavyHit()
+        {
+            if (hitAttempted)
+                return;
+
+            ContactFilter2D filter = new() { useTriggers = false };
+            Physics2D.OverlapBox(HeavyHitboxCenter, HeavyHitboxSize, 0f, filter, overlaps);
+            for (int i = 0; i < overlaps.Count; i++)
+            {
+                Collider2D hit = overlaps[i];
+                if (hit == null || hit.GetComponentInParent<PlayerHealth>() != target)
+                    continue;
+
+                // Do not swing through a solid obstacle that stopped the approach.
+                float reach = Mathf.Abs(hit.bounds.center.x - bodyCollider.bounds.center.x);
+                RaycastHit2D obstacle = FindForwardObstacle(new Vector2(facingDirection, 0f), reach,
+                    Mathf.Max(0.001f, collisionSkin));
+                if (obstacle.collider != null && obstacle.collider.GetComponentInParent<PlayerHealth>() != target)
+                    return;
+
+                hitAttempted = true;
+                target.TakeDamage(Mathf.Max(1, heavyDamage), transform.position);
+                return;
             }
         }
 
@@ -388,11 +522,12 @@ namespace TheRedDoor.Boss
         {
             CurrentState = nextState;
             stateTimeRemaining = Mathf.Max(Time.fixedDeltaTime, duration);
-            if (nextState != State.Charge)
-            {
+            if (nextState != State.Charge && nextState != State.HeavyAdvance)
                 StopMovement();
+            if (nextState != State.Charge)
                 finishChargeAfterStep = false;
-            }
+            if (nextState != State.HeavyAdvance)
+                finishHeavyAdvanceAfterStep = false;
             if (visualCached && spriteRenderer != null)
             {
                 spriteRenderer.color = nextState switch
@@ -403,6 +538,8 @@ namespace TheRedDoor.Boss
                     State.Charge => chargeColor,
                     State.SlamTelegraph => slamTelegraphColor,
                     State.Slam => slamColor,
+                    State.HeavyTelegraph or State.HeavyAdvance or State.HeavyWindup => heavyTelegraphColor,
+                    State.HeavyStrike => heavyStrikeColor,
                     _ => originalColor
                 };
             }
@@ -428,6 +565,13 @@ namespace TheRedDoor.Boss
                 new Vector2(Mathf.Abs(hitboxOffset.x) * previewDirection, hitboxOffset.y);
             Gizmos.color = CurrentState == State.Swipe ? swipeColor : telegraphColor;
             Gizmos.DrawWireCube(center, HitboxSize);
+            if (heavyStrikeEnabled)
+            {
+                Gizmos.color = heavyTelegraphColor;
+                Vector2 heavyCenter = (Vector2)transform.position +
+                    new Vector2(Mathf.Abs(heavyHitboxOffset.x) * previewDirection, heavyHitboxOffset.y);
+                Gizmos.DrawWireCube(heavyCenter, HeavyHitboxSize);
+            }
             Gizmos.color = chargeTelegraphColor;
             Vector3 left = new(arenaXLimits.x, transform.position.y, transform.position.z);
             Vector3 right = new(arenaXLimits.y, transform.position.y, transform.position.z);
