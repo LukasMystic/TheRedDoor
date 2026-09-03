@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TheRedDoor.Boss
 {
-    // Two readable attacks on a flat arena floor. Animation and later attacks stay separate.
+    // Readable attacks on a flat arena floor. Animation and later phases stay separate.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BossHealth), typeof(Rigidbody2D))]
     public sealed class KeeperController : MonoBehaviour
@@ -40,6 +40,15 @@ namespace TheRedDoor.Boss
         [SerializeField, Min(0.01f)] private float chargeRecoveryDuration = 1.4f;
         [SerializeField, Min(1)] private int chargeDamage = 1;
 
+        [Header("Ground Slam")]
+        [Tooltip("Assign a GroundShockwave prefab to enable slams. Empty preserves swipe/charge only.")]
+        [SerializeField] private GroundShockwave shockwavePrefab;
+        [Tooltip("Number of swipe/charge attacks before a slam. Starts counting again after each slam.")]
+        [SerializeField, Min(1)] private int attacksBetweenSlams = 2;
+        [SerializeField, Min(0.01f)] private float slamTelegraphDuration = 0.9f;
+        [SerializeField, Min(0.01f)] private float slamActiveDuration = 0.2f;
+        [SerializeField, Min(0.01f)] private float slamRecoveryDuration = 1.6f;
+
         [Header("Flat Arena Limits")]
         [Tooltip("World X limits for the boss ROOT, leaving room for its collider inside the floor edges.")]
         [SerializeField] private Vector2 arenaXLimits = new(-6.5f, 6.5f);
@@ -53,8 +62,10 @@ namespace TheRedDoor.Boss
         [SerializeField] private Color swipeColor = new(1f, 0.2f, 0.2f, 1f);
         [SerializeField] private Color chargeTelegraphColor = new(0.3f, 0.75f, 1f, 1f);
         [SerializeField] private Color chargeColor = new(0.75f, 0.3f, 1f, 1f);
+        [SerializeField] private Color slamTelegraphColor = new(0.7f, 1f, 0.15f, 1f);
+        [SerializeField] private Color slamColor = new(0.2f, 1f, 0.4f, 1f);
 
-        public enum State { Idle, Telegraph, Swipe, Recovery, Defeated, ChargeTelegraph, Charge }
+        public enum State { Idle, Telegraph, Swipe, Recovery, Defeated, ChargeTelegraph, Charge, SlamTelegraph, Slam }
         public State CurrentState { get; private set; }
         public bool IsFacingRight => facingDirection > 0f;
 
@@ -70,6 +81,8 @@ namespace TheRedDoor.Boss
         private bool visualCached;
         private bool preferCharge;
         private bool finishChargeAfterStep;
+        private int attacksSinceSlam;
+        private GroundShockwave activeShockwave;
 
         private Vector2 HitboxCenter => (Vector2)transform.position +
             new Vector2(Mathf.Abs(hitboxOffset.x) * facingDirection, hitboxOffset.y);
@@ -106,6 +119,13 @@ namespace TheRedDoor.Boss
                 return;
             }
 
+            if (shockwavePrefab != null &&
+                (shockwavePrefab.gameObject.scene.IsValid() || !shockwavePrefab.IsConfigured))
+            {
+                Debug.LogError("Keeper Ground Slam needs an active prefab from the Project window with an enabled GroundShockwave and a centered sprite, without Collider2D or Rigidbody2D components. Slams are disabled until this is corrected.", this);
+                shockwavePrefab = null;
+            }
+
             originalColor = spriteRenderer.color;
             visualCached = true;
         }
@@ -117,6 +137,7 @@ namespace TheRedDoor.Boss
             if (target != null)
                 target.Died.AddListener(HandleTargetDeath);
             preferCharge = false;
+            attacksSinceSlam = 0;
             SetState(State.Idle);
         }
 
@@ -127,6 +148,7 @@ namespace TheRedDoor.Boss
             if (target != null)
                 target.Died.RemoveListener(HandleTargetDeath);
             SetState(State.Idle);
+            ClearShockwave();
             overlaps.Clear();
             chargeHits.Clear();
         }
@@ -134,11 +156,13 @@ namespace TheRedDoor.Boss
         private void HandleDefeat()
         {
             SetState(State.Defeated);
+            ClearShockwave();
         }
 
         private void HandleTargetDeath()
         {
             SetState(State.Idle);
+            ClearShockwave();
         }
 
         private void FixedUpdate()
@@ -146,18 +170,21 @@ namespace TheRedDoor.Boss
             if (body == null || !body.simulated || bodyCollider == null || !bodyCollider.enabled ||
                 health == null || !health.isActiveAndEnabled)
             {
+                ClearShockwave();
                 SetState(State.Idle);
                 return;
             }
 
             if (health.IsDefeated)
             {
+                ClearShockwave();
                 SetState(State.Defeated);
                 return;
             }
 
             if (target == null || !target.isActiveAndEnabled || target.IsDead)
             {
+                ClearShockwave();
                 SetState(State.Idle);
                 return;
             }
@@ -168,6 +195,10 @@ namespace TheRedDoor.Boss
 
             if (CurrentState == State.Idle)
             {
+                // A tuned slower wave must finish before another attack can overlap it.
+                if (activeShockwave != null && activeShockwave.IsTravelling)
+                    return;
+
                 Vector2 distance = target.transform.position - transform.position;
                 if (Mathf.Abs(distance.x) > 0.01f)
                     facingDirection = Mathf.Sign(distance.x);
@@ -180,6 +211,14 @@ namespace TheRedDoor.Boss
                     Mathf.Abs(distance.y) <= Mathf.Max(0f, maxVerticalDistance))
                 {
                     hitAttempted = false;
+                    if (shockwavePrefab != null && attacksSinceSlam >= Mathf.Max(1, attacksBetweenSlams))
+                    {
+                        attacksSinceSlam = 0;
+                        SetState(State.SlamTelegraph, slamTelegraphDuration);
+                        return;
+                    }
+
+                    attacksSinceSlam = Mathf.Min(attacksSinceSlam + 1, Mathf.Max(1, attacksBetweenSlams));
                     bool useCharge = horizontalDistance > swipeRange || preferCharge;
                     preferCharge = !useCharge;
                     SetState(useCharge ? State.ChargeTelegraph : State.Telegraph,
@@ -188,7 +227,8 @@ namespace TheRedDoor.Boss
                 return;
             }
 
-            if (CurrentState == State.Telegraph || CurrentState == State.ChargeTelegraph || CurrentState == State.Recovery)
+            if (CurrentState == State.Telegraph || CurrentState == State.ChargeTelegraph ||
+                CurrentState == State.SlamTelegraph || CurrentState == State.Recovery)
             {
                 stateTimeRemaining -= Time.fixedDeltaTime;
                 if (stateTimeRemaining > 0f)
@@ -200,13 +240,29 @@ namespace TheRedDoor.Boss
                     return;
                 }
 
-                bool isCharge = CurrentState == State.ChargeTelegraph;
-                SetState(isCharge ? State.Charge : State.Swipe, isCharge ? chargeDuration : activeDuration);
+                if (CurrentState == State.SlamTelegraph)
+                {
+                    SetState(State.Slam, slamActiveDuration);
+                    SpawnShockwave();
+                }
+                else
+                {
+                    bool isCharge = CurrentState == State.ChargeTelegraph;
+                    SetState(isCharge ? State.Charge : State.Swipe, isCharge ? chargeDuration : activeDuration);
+                }
             }
 
             if (CurrentState == State.Charge)
             {
                 UpdateCharge();
+                return;
+            }
+
+            if (CurrentState == State.Slam)
+            {
+                stateTimeRemaining -= Time.fixedDeltaTime;
+                if (stateTimeRemaining <= 0f)
+                    SetState(State.Recovery, slamRecoveryDuration);
                 return;
             }
 
@@ -308,6 +364,26 @@ namespace TheRedDoor.Boss
             }
         }
 
+        private void SpawnShockwave()
+        {
+            ClearShockwave();
+            if (shockwavePrefab == null)
+                return;
+
+            // Spawn at the feet, independent of the boss sprite's scale or pivot.
+            Bounds bounds = bodyCollider.bounds;
+            Vector3 position = new(bounds.center.x, bounds.min.y, transform.position.z);
+            activeShockwave = Instantiate(shockwavePrefab, position, Quaternion.identity);
+            activeShockwave.Launch(this, target, facingDirection, arenaXLimits);
+        }
+
+        private void ClearShockwave()
+        {
+            if (activeShockwave != null)
+                activeShockwave.Cancel();
+            activeShockwave = null;
+        }
+
         private void SetState(State nextState, float duration = 0f)
         {
             CurrentState = nextState;
@@ -325,6 +401,8 @@ namespace TheRedDoor.Boss
                     State.Swipe => swipeColor,
                     State.ChargeTelegraph => chargeTelegraphColor,
                     State.Charge => chargeColor,
+                    State.SlamTelegraph => slamTelegraphColor,
+                    State.Slam => slamColor,
                     _ => originalColor
                 };
             }
