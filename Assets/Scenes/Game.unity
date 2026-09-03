@@ -575,6 +575,7 @@ GameObject:
   - component: {fileID: 2089422141}
   - component: {fileID: 2089422140}
   - component: {fileID: 2089422139}
+  - component: {fileID: 2089422143}
   m_Layer: 6
   m_Name: CombatDummy
   m_TagString: Untagged
@@ -725,6 +726,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2089422143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089422138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46941f42d68143f98cf898b5ad63f35d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Boss.KeeperController
+  target: {fileID: 361076036}
+  spriteRenderer: {fileID: 2089422141}
+  activationRange: 2.3
+  maxVerticalDistance: 1.5
+  damage: 1
+  hitboxOffset: {x: 0.9, y: 0}
+  hitboxSize: {x: 1.4, y: 1.1}
+  telegraphDuration: 0.6
+  activeDuration: 0.12
+  recoveryDuration: 1.2
+  spriteFacesRight: 1
+  telegraphColor: {r: 1, g: 0.65, b: 0.1, a: 1}
+  swipeColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!1001 &5725785860005943220
 PrefabInstance:
   m_ObjectHideFlags: 0
