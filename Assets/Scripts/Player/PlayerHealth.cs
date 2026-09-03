@@ -35,7 +35,8 @@ namespace TheRedDoor.Player
         public int MaxHealth => maxHealth;
         public int CurrentHealth => currentHealth;
         public bool IsDead => currentHealth <= 0;
-        public bool IsInvulnerable => Time.time < invulnerableUntil;
+        public bool IsInvulnerable => Time.time < invulnerableUntil ||
+            (controller != null && controller.HasDashInvulnerability);
         public UnityEvent<int, int> HealthChanged => onHealthChanged;
         public UnityEvent Damaged => onDamaged;
         public UnityEvent Died => onDied;
