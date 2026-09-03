@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TheRedDoor.Boss
 {
-    // Readable attacks on a flat arena floor. Animation and later phases stay separate.
+    // Readable phased attacks on a flat arena floor. Animation stays separate.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BossHealth), typeof(Rigidbody2D))]
     public sealed class KeeperController : MonoBehaviour
@@ -68,6 +68,19 @@ namespace TheRedDoor.Boss
         [SerializeField] private Vector2 heavyHitboxOffset = new(1.1f, 0f);
         [SerializeField] private Vector2 heavyHitboxSize = new(2.2f, 1.8f);
 
+        [Header("Health Phases")]
+        [Tooltip("Phase 2 starts at or below this fraction of maximum health.")]
+        [SerializeField, Range(0f, 1f)] private float phaseTwoThreshold = 0.7f;
+        [Tooltip("Phase 3 starts at or below this fraction of maximum health.")]
+        [SerializeField, Range(0f, 1f)] private float phaseThreeThreshold = 0.3f;
+        [Tooltip("Runtime display. Phase changes affect the next attack, never one already in progress.")]
+        [SerializeField] private Phase currentPhase = Phase.One;
+        [SerializeField] private PhaseTuning phaseOne = new(1.1f, 1.15f, 0.9f, 0, 0);
+        [SerializeField] private PhaseTuning phaseTwo = new(0.98f, 0.85f, 1.1f, 4, 0);
+        [SerializeField] private PhaseTuning phaseThree = new(0.9f, 0.65f, 1.25f, 3, 1);
+        [Tooltip("Additional recovery multiplier for an occasional chained attack in Phases 2 and 3.")]
+        [SerializeField, Range(0.1f, 1f)] private float chainedRecoveryMultiplier = 0.4f;
+
         [Header("Flat Arena Limits")]
         [Tooltip("World X limits for the boss ROOT, leaving room for its collider inside the floor edges.")]
         [SerializeField] private Vector2 arenaXLimits = new(-6.5f, 6.5f);
@@ -91,7 +104,39 @@ namespace TheRedDoor.Boss
             Idle, Telegraph, Swipe, Recovery, Defeated, ChargeTelegraph, Charge, SlamTelegraph, Slam,
             HeavyTelegraph, HeavyAdvance, HeavyWindup, HeavyStrike
         }
+        public enum Phase { One = 1, Two = 2, Three = 3 }
+
+        [System.Serializable]
+        private sealed class PhaseTuning
+        {
+            [Tooltip("Scales attack warnings. Keep this high enough for attacks to remain readable.")]
+            [SerializeField, Min(0.1f)] private float telegraphMultiplier = 1f;
+            [SerializeField, Min(0.1f)] private float recoveryMultiplier = 1f;
+            [SerializeField, Min(0.1f)] private float movementSpeedMultiplier = 1f;
+            [Tooltip("0 disables chains. Otherwise this attack count gets a much shorter recovery.")]
+            [SerializeField, Min(0)] private int chainEveryAttacks;
+            [Tooltip("Reduces the configured slam and heavy intervals. Phase 3 uses 1.")]
+            [SerializeField, Min(0)] private int specialAttackIntervalReduction;
+
+            public float TelegraphMultiplier => Mathf.Max(0.1f, telegraphMultiplier);
+            public float RecoveryMultiplier => Mathf.Max(0.1f, recoveryMultiplier);
+            public float MovementSpeedMultiplier => Mathf.Max(0.1f, movementSpeedMultiplier);
+            public int ChainEveryAttacks => Mathf.Max(0, chainEveryAttacks);
+            public int SpecialAttackIntervalReduction => Mathf.Max(0, specialAttackIntervalReduction);
+
+            public PhaseTuning(float telegraph, float recovery, float movement, int chainEvery,
+                int specialAttackReduction)
+            {
+                telegraphMultiplier = telegraph;
+                recoveryMultiplier = recovery;
+                movementSpeedMultiplier = movement;
+                chainEveryAttacks = chainEvery;
+                specialAttackIntervalReduction = specialAttackReduction;
+            }
+        }
+
         public State CurrentState { get; private set; }
+        public Phase CurrentPhase => currentPhase;
         public bool IsFacingRight => facingDirection > 0f;
 
         private readonly List<Collider2D> overlaps = new(8);
@@ -111,6 +156,11 @@ namespace TheRedDoor.Boss
         private int attacksSinceHeavyStrike;
         private float heavyDestinationX;
         private bool finishHeavyAdvanceAfterStep;
+        private int attacksSinceChain;
+        private float attackTelegraphMultiplier = 1f;
+        private float attackRecoveryMultiplier = 1f;
+        private float attackMovementSpeedMultiplier = 1f;
+        private bool currentAttackChains;
 
         private Vector2 HitboxCenter => (Vector2)transform.position +
             new Vector2(Mathf.Abs(hitboxOffset.x) * facingDirection, hitboxOffset.y);
@@ -165,19 +215,27 @@ namespace TheRedDoor.Boss
         private void OnEnable()
         {
             if (health != null)
+            {
                 health.Defeated.AddListener(HandleDefeat);
+                health.Damaged.AddListener(HandleHealthChanged);
+            }
             if (target != null)
                 target.Died.AddListener(HandleTargetDeath);
             preferCharge = false;
             attacksSinceSlam = 0;
             attacksSinceHeavyStrike = 0;
+            attacksSinceChain = 0;
+            UpdatePhase(true);
             SetState(State.Idle);
         }
 
         private void OnDisable()
         {
             if (health != null)
+            {
                 health.Defeated.RemoveListener(HandleDefeat);
+                health.Damaged.RemoveListener(HandleHealthChanged);
+            }
             if (target != null)
                 target.Died.RemoveListener(HandleTargetDeath);
             SetState(State.Idle);
@@ -190,6 +248,11 @@ namespace TheRedDoor.Boss
         {
             SetState(State.Defeated);
             ClearShockwave();
+        }
+
+        private void HandleHealthChanged()
+        {
+            UpdatePhase(false);
         }
 
         private void HandleTargetDeath()
@@ -243,32 +306,35 @@ namespace TheRedDoor.Boss
                 if (horizontalDistance <= Mathf.Max(swipeRange, chargeActivationRange) &&
                     Mathf.Abs(distance.y) <= Mathf.Max(0f, maxVerticalDistance))
                 {
+                    UpdatePhase(false);
                     hitAttempted = false;
+                    int heavyInterval = GetHeavyInterval();
                     if (heavyStrikeEnabled && horizontalDistance <= Mathf.Max(0.01f, heavyActivationRange) &&
-                        attacksSinceHeavyStrike >= Mathf.Max(1, attacksBetweenHeavyStrikes))
+                        attacksSinceHeavyStrike >= heavyInterval)
                     {
                         attacksSinceHeavyStrike = 0;
                         float step = Mathf.Min(Mathf.Max(0f, heavyStepDistance),
                             Mathf.Max(0f, horizontalDistance - Mathf.Max(0f, heavyStoppingDistance)));
                         heavyDestinationX = Mathf.Clamp(body.position.x + facingDirection * step,
                             arenaXLimits.x, arenaXLimits.y);
-                        SetState(State.HeavyTelegraph, heavyTelegraphDuration);
+                        BeginAttack(State.HeavyTelegraph, heavyTelegraphDuration);
                         return;
                     }
 
-                    if (attacksSinceHeavyStrike < Mathf.Max(1, attacksBetweenHeavyStrikes))
+                    if (attacksSinceHeavyStrike < heavyInterval)
                         attacksSinceHeavyStrike++;
-                    if (shockwavePrefab != null && attacksSinceSlam >= Mathf.Max(1, attacksBetweenSlams))
+                    int slamInterval = GetSlamInterval();
+                    if (shockwavePrefab != null && attacksSinceSlam >= slamInterval)
                     {
                         attacksSinceSlam = 0;
-                        SetState(State.SlamTelegraph, slamTelegraphDuration);
+                        BeginAttack(State.SlamTelegraph, slamTelegraphDuration);
                         return;
                     }
 
-                    attacksSinceSlam = Mathf.Min(attacksSinceSlam + 1, Mathf.Max(1, attacksBetweenSlams));
+                    attacksSinceSlam = Mathf.Min(attacksSinceSlam + 1, slamInterval);
                     bool useCharge = horizontalDistance > swipeRange || preferCharge;
                     preferCharge = !useCharge;
-                    SetState(useCharge ? State.ChargeTelegraph : State.Telegraph,
+                    BeginAttack(useCharge ? State.ChargeTelegraph : State.Telegraph,
                         useCharge ? chargeTelegraphDuration : telegraphDuration);
                 }
                 return;
@@ -327,7 +393,7 @@ namespace TheRedDoor.Boss
                     return; // A lethal damage callback may already have cancelled the attack.
                 stateTimeRemaining -= Time.fixedDeltaTime;
                 if (stateTimeRemaining <= 0f)
-                    SetState(State.Recovery, heavyRecoveryDuration);
+                    BeginRecovery(heavyRecoveryDuration);
                 return;
             }
 
@@ -335,7 +401,7 @@ namespace TheRedDoor.Boss
             {
                 stateTimeRemaining -= Time.fixedDeltaTime;
                 if (stateTimeRemaining <= 0f)
-                    SetState(State.Recovery, slamRecoveryDuration);
+                    BeginRecovery(slamRecoveryDuration);
                 return;
             }
 
@@ -345,26 +411,26 @@ namespace TheRedDoor.Boss
                 return;
             stateTimeRemaining -= Time.fixedDeltaTime;
             if (stateTimeRemaining <= 0f)
-                SetState(State.Recovery, recoveryDuration);
+                BeginRecovery(recoveryDuration);
         }
 
         private void UpdateCharge()
         {
             if (finishChargeAfterStep || stateTimeRemaining <= 0f)
             {
-                SetState(State.Recovery, chargeRecoveryDuration);
+                BeginRecovery(chargeRecoveryDuration);
                 return;
             }
 
             Vector2 direction = new(facingDirection, 0f);
             float limit = IsFacingRight ? arenaXLimits.y : arenaXLimits.x;
             float distanceToLimit = Mathf.Max(0f, (limit - body.position.x) * facingDirection);
-            float distance = Mathf.Min(Mathf.Max(0.01f, chargeSpeed) *
+            float distance = Mathf.Min(Mathf.Max(0.01f, chargeSpeed) * attackMovementSpeedMultiplier *
                 Mathf.Min(Time.fixedDeltaTime, stateTimeRemaining), distanceToLimit);
 
             if (distance <= 0f)
             {
-                SetState(State.Recovery, chargeRecoveryDuration);
+                BeginRecovery(chargeRecoveryDuration);
                 return;
             }
 
@@ -397,7 +463,7 @@ namespace TheRedDoor.Boss
             float remaining = Mathf.Max(0f, (heavyDestinationX - body.position.x) * facingDirection);
             if (finishHeavyAdvanceAfterStep || remaining <= 0.001f)
             {
-                SetState(State.HeavyWindup, heavyWindupDuration);
+                SetState(State.HeavyWindup, heavyWindupDuration * attackTelegraphMultiplier);
                 return;
             }
 
@@ -405,7 +471,7 @@ namespace TheRedDoor.Boss
             float limit = IsFacingRight ? arenaXLimits.y : arenaXLimits.x;
             float distanceToLimit = Mathf.Max(0f, (limit - body.position.x) * facingDirection);
             float distance = Mathf.Min(remaining, Mathf.Min(distanceToLimit,
-                Mathf.Max(0.01f, heavyStepSpeed) * Time.fixedDeltaTime));
+                Mathf.Max(0.01f, heavyStepSpeed) * attackMovementSpeedMultiplier * Time.fixedDeltaTime));
             float skin = Mathf.Max(0.001f, collisionSkin);
             RaycastHit2D nearest = FindForwardObstacle(direction, distance, skin);
             if (nearest.collider != null)
@@ -516,6 +582,72 @@ namespace TheRedDoor.Boss
             if (activeShockwave != null)
                 activeShockwave.Cancel();
             activeShockwave = null;
+        }
+
+        private void UpdatePhase(bool resetChainCount)
+        {
+            if (health == null || health.MaxHealth <= 0)
+                return;
+
+            float phaseTwoStart = Mathf.Clamp01(phaseTwoThreshold);
+            float phaseThreeStart = Mathf.Clamp(phaseThreeThreshold, 0f, phaseTwoStart);
+            float healthFraction = (float)health.CurrentHealth / health.MaxHealth;
+            Phase nextPhase = healthFraction > phaseTwoStart
+                ? Phase.One
+                : healthFraction > phaseThreeStart ? Phase.Two : Phase.Three;
+
+            if (resetChainCount || nextPhase != currentPhase)
+                attacksSinceChain = 0;
+            currentPhase = nextPhase;
+        }
+
+        private PhaseTuning CurrentPhaseTuning => currentPhase switch
+        {
+            Phase.Two => phaseTwo,
+            Phase.Three => phaseThree,
+            _ => phaseOne
+        };
+
+        private int GetSlamInterval()
+        {
+            return Mathf.Max(1, attacksBetweenSlams - CurrentPhaseTuning.SpecialAttackIntervalReduction);
+        }
+
+        private int GetHeavyInterval()
+        {
+            return Mathf.Max(1, attacksBetweenHeavyStrikes - CurrentPhaseTuning.SpecialAttackIntervalReduction);
+        }
+
+        private void BeginAttack(State telegraphState, float baseTelegraphDuration)
+        {
+            PhaseTuning tuning = CurrentPhaseTuning;
+            attackTelegraphMultiplier = tuning.TelegraphMultiplier;
+            attackRecoveryMultiplier = tuning.RecoveryMultiplier;
+            attackMovementSpeedMultiplier = tuning.MovementSpeedMultiplier;
+
+            currentAttackChains = false;
+            int chainInterval = tuning.ChainEveryAttacks;
+            if (chainInterval <= 0)
+            {
+                attacksSinceChain = 0;
+            }
+            else
+            {
+                attacksSinceChain++;
+                if (attacksSinceChain >= chainInterval)
+                {
+                    attacksSinceChain = 0;
+                    currentAttackChains = true;
+                }
+            }
+
+            SetState(telegraphState, baseTelegraphDuration * attackTelegraphMultiplier);
+        }
+
+        private void BeginRecovery(float baseRecoveryDuration)
+        {
+            float chainMultiplier = currentAttackChains ? Mathf.Clamp(chainedRecoveryMultiplier, 0.1f, 1f) : 1f;
+            SetState(State.Recovery, baseRecoveryDuration * attackRecoveryMultiplier * chainMultiplier);
         }
 
         private void SetState(State nextState, float duration = 0f)
