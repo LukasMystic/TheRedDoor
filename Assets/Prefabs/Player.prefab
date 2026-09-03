@@ -106,6 +106,7 @@ GameObject:
   - component: {fileID: 5738819343744341868}
   - component: {fileID: 5863697910963683827}
   - component: {fileID: 4230514529362291998}
+  - component: {fileID: 2085790470734170487}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -356,6 +357,35 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onAttackFinished:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &2085790470734170487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3242269044723518385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d341fde6d6e64d66a2cd7dc0e9ba3470, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Player.PlayerHealth
+  maxHealth: 5
+  currentHealth: 0
+  invulnerabilityDuration: 0.8
+  knockbackVelocity: {x: 6, y: 4}
+  knockbackDuration: 0.18
+  spriteRenderer: {fileID: 1897977767935321957}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.12
+  onHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDamaged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDied:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &3420217917009287355
