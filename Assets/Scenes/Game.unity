@@ -1498,7 +1498,7 @@ MonoBehaviour:
   chargeDuration: 0.65
   chargeRecoveryDuration: 1.4
   chargeDamage: 1
-  shockwavePrefab: {fileID: 0}
+  shockwavePrefab: {fileID: 3694800349384956809, guid: b003fbb6690c94f5dbf366482ebb6e84, type: 3}
   attacksBetweenSlams: 2
   slamTelegraphDuration: 0.9
   slamActiveDuration: 0.2
