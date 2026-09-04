@@ -130,6 +130,8 @@ GameObject:
   - component: {fileID: 190607875}
   - component: {fileID: 190607877}
   - component: {fileID: 190607876}
+  - component: {fileID: 190607879}
+  - component: {fileID: 190607878}
   m_Layer: 5
   m_Name: BossHealthHUD
   m_TagString: Untagged
@@ -196,6 +198,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 190607874}
   m_CullTransparentMesh: 1
+--- !u!114 &190607878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190607874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 460dbf32d6e843b781eb7cc410f69251, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.UI.BossHealthUI
+  bossHealth: {fileID: 2089422139}
+  keeper: {fileID: 2089422143}
+  playerHealth: {fileID: 361076036}
+  healthFill: {fileID: 1486680692}
+  bossNameLabel: {fileID: 947244755}
+  bossName: THE KEEPER
+--- !u!225 &190607879
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190607874}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &253008075
 GameObject:
   m_ObjectHideFlags: 0
