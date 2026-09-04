@@ -985,14 +985,14 @@ MonoBehaviour:
   healthImage: {fileID: 1728339601}
   healthLabel: {fileID: 312032748}
   healthStages:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: -2678938160135631972, guid: a9510508baa044ba784a9af648227f27, type: 3}
+  - {fileID: -4869271900056754113, guid: c413bae1b9e1b47b8af6533281e4ab77, type: 3}
+  - {fileID: 2967806508992329390, guid: 9394d20bed11b49509c325e7191a1b29, type: 3}
+  - {fileID: 181384559890750808, guid: d47430522e92f49e88e85ff185a84608, type: 3}
+  - {fileID: 4765451539005823012, guid: 30395ebba99fd469e93027edd3afef0a, type: 3}
+  - {fileID: 1489434470654963651, guid: b404b8faf70594d59b2a28e9103d753f, type: 3}
+  - {fileID: 173538894772244785, guid: 95c9755b5f167446abddc9a50570a0cf, type: 3}
+  - {fileID: -6197983024930244784, guid: d6f183b15c27c498c80d6c5b70acf3e7, type: 3}
 --- !u!1 &1837442639
 GameObject:
   m_ObjectHideFlags: 0
