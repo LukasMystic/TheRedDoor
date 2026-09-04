@@ -755,6 +755,81 @@ SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 1897977767935321957, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
   m_PrefabInstance: {fileID: 5725785860005943220}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1728339599
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1728339600}
+  - component: {fileID: 1728339602}
+  - component: {fileID: 1728339601}
+  m_Layer: 5
+  m_Name: PlayerHealthHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1728339600
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728339599}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1945757916}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 32, y: -32}
+  m_SizeDelta: {x: 120, y: 120}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1728339601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728339599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -6197983024930244784, guid: d6f183b15c27c498c80d6c5b70acf3e7, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1728339602
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728339599}
+  m_CullTransparentMesh: 1
 --- !u!1 &1837442639
 GameObject:
   m_ObjectHideFlags: 0
@@ -1216,6 +1291,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1905187852}
+  - {fileID: 1728339600}
   - {fileID: 1909760841}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1503,6 +1579,41 @@ MonoBehaviour:
   slamTelegraphDuration: 0.9
   slamActiveDuration: 0.2
   slamRecoveryDuration: 1.6
+  heavyStrikeEnabled: 1
+  attacksBetweenHeavyStrikes: 3
+  heavyActivationRange: 4.5
+  heavyTelegraphDuration: 1
+  heavyStepDistance: 2
+  heavyStepSpeed: 5
+  heavyStoppingDistance: 1.2
+  heavyWindupDuration: 0.35
+  heavyActiveDuration: 0.18
+  heavyRecoveryDuration: 2
+  heavyDamage: 2
+  heavyHitboxOffset: {x: 1.1, y: 0}
+  heavyHitboxSize: {x: 2.2, y: 1.8}
+  phaseTwoThreshold: 0.7
+  phaseThreeThreshold: 0.3
+  currentPhase: 1
+  phaseOne:
+    telegraphMultiplier: 1.1
+    recoveryMultiplier: 1.15
+    movementSpeedMultiplier: 0.9
+    chainEveryAttacks: 0
+    specialAttackIntervalReduction: 0
+  phaseTwo:
+    telegraphMultiplier: 0.98
+    recoveryMultiplier: 0.85
+    movementSpeedMultiplier: 1.1
+    chainEveryAttacks: 4
+    specialAttackIntervalReduction: 0
+  phaseThree:
+    telegraphMultiplier: 0.9
+    recoveryMultiplier: 0.65
+    movementSpeedMultiplier: 1.25
+    chainEveryAttacks: 3
+    specialAttackIntervalReduction: 1
+  chainedRecoveryMultiplier: 0.4
   arenaXLimits: {x: -6.5, y: 6.5}
   collisionSkin: 0.02
   spriteFacesRight: 1
@@ -1512,6 +1623,8 @@ MonoBehaviour:
   chargeColor: {r: 0.75, g: 0.3, b: 1, a: 1}
   slamTelegraphColor: {r: 0.7, g: 1, b: 0.15, a: 1}
   slamColor: {r: 0.2, g: 1, b: 0.4, a: 1}
+  heavyTelegraphColor: {r: 1, g: 0.5, b: 0.8, a: 1}
+  heavyStrikeColor: {r: 0.85, g: 0, b: 0.45, a: 1}
 --- !u!50 &2089422144
 Rigidbody2D:
   serializedVersion: 5
