@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4763206673025085906}
   - component: {fileID: 1897977767935321957}
+  - component: {fileID: 3361247229507552805}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -92,6 +93,28 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!95 &3361247229507552805
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2447244280804804112}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 0561b7017ed07481b991909210cdf405, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &3242269044723518385
 GameObject:
   m_ObjectHideFlags: 0
@@ -107,6 +130,7 @@ GameObject:
   - component: {fileID: 5863697910963683827}
   - component: {fileID: 4230514529362291998}
   - component: {fileID: 2085790470734170487}
+  - component: {fileID: 9105797249133464872}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -322,6 +346,10 @@ MonoBehaviour:
   coyoteTime: 0.12
   jumpBufferDuration: 0.12
   jumpCutMultiplier: 0.5
+  dashSpeed: 18
+  dashDuration: 0.15
+  dashCooldown: 0.6
+  invulnerableDuringDash: 1
   groundCheck: {fileID: 2056637716175150432}
   groundCheckSize: {x: 0.6, y: 0.12}
   groundLayer:
@@ -331,6 +359,7 @@ MonoBehaviour:
   actionMapName: Player
   moveActionName: Move
   jumpActionName: Jump
+  dashActionName: Sprint
 --- !u!114 &4230514529362291998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,6 +382,7 @@ MonoBehaviour:
   activeDuration: 0.12
   attackCooldown: 0.4
   attackActionPath: Player/Attack
+  attackBufferDuration: 0.35
   onAttackStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -388,6 +418,27 @@ MonoBehaviour:
   onDied:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &9105797249133464872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3242269044723518385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d38e4bc74d44da5ad7de7f69f021d0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Player.PlayerAnimationController
+  animator: {fileID: 0}
+  layerName: Base Layer
+  idleStateName: Player_Idle
+  runStateName: Player_Run
+  jumpStateName: Player_Jump
+  fallStateName: Player_Fall
+  moveSpeedThreshold: 0.1
+  upwardSpeedThreshold: 0.1
+  crossFadeDuration: 0.05
 --- !u!1 &3420217917009287355
 GameObject:
   m_ObjectHideFlags: 0
