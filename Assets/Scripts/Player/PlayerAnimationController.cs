@@ -3,18 +3,19 @@ using UnityEngine;
 namespace TheRedDoor.Player
 {
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(PlayerController), typeof(Rigidbody2D))]
+    [RequireComponent(typeof(PlayerController), typeof(Rigidbody2D), typeof(PlayerCombat))]
     public sealed class PlayerAnimationController : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private Animator animator;
 
-        [Header("Locomotion States")]
+        [Header("Animation States")]
         [SerializeField] private string layerName = "Base Layer";
         [SerializeField] private string idleStateName = "Player_Idle";
         [SerializeField] private string runStateName = "Player_Run";
         [SerializeField] private string jumpStateName = "Player_Jump";
         [SerializeField] private string fallStateName = "Player_Fall";
+        [SerializeField] private string attackStateName = "Player_Attack";
 
         [Header("Tuning")]
         [SerializeField, Min(0f)] private float moveSpeedThreshold = 0.1f;
@@ -22,16 +23,19 @@ namespace TheRedDoor.Player
         [SerializeField, Min(0f)] private float crossFadeDuration = 0.05f;
 
         private PlayerController controller;
+        private PlayerCombat combat;
         private Rigidbody2D body;
         private int idleStateHash;
         private int runStateHash;
         private int jumpStateHash;
         private int fallStateHash;
+        private int attackStateHash;
         private int currentStateHash;
 
         private void Awake()
         {
             controller = GetComponent<PlayerController>();
+            combat = GetComponent<PlayerCombat>();
             body = GetComponent<Rigidbody2D>();
             animator = animator != null ? animator : GetComponentInChildren<Animator>();
 
@@ -39,6 +43,7 @@ namespace TheRedDoor.Player
             runStateHash = HashStateName(runStateName);
             jumpStateHash = HashStateName(jumpStateName);
             fallStateHash = HashStateName(fallStateName);
+            attackStateHash = HashStateName(attackStateName);
         }
 
         private void Start()
@@ -54,7 +59,7 @@ namespace TheRedDoor.Player
 
         private void LateUpdate()
         {
-            int desiredStateHash = SelectLocomotionState();
+            int desiredStateHash = SelectAnimationState();
             if (desiredStateHash == currentStateHash)
                 return;
 
@@ -62,8 +67,11 @@ namespace TheRedDoor.Player
             currentStateHash = desiredStateHash;
         }
 
-        private int SelectLocomotionState()
+        private int SelectAnimationState()
         {
+            if (combat.IsAttacking)
+                return attackStateHash;
+
             if (!controller.IsGrounded)
                 return body.linearVelocity.y > upwardSpeedThreshold ? jumpStateHash : fallStateHash;
 
@@ -84,10 +92,11 @@ namespace TheRedDoor.Player
             }
 
             if (!animator.HasState(0, idleStateHash) || !animator.HasState(0, runStateHash) ||
-                !animator.HasState(0, jumpStateHash) || !animator.HasState(0, fallStateHash))
+                !animator.HasState(0, jumpStateHash) || !animator.HasState(0, fallStateHash) ||
+                !animator.HasState(0, attackStateHash))
             {
                 Debug.LogError(
-                    "PlayerAnimator must contain Player_Idle, Player_Run, Player_Jump, and Player_Fall states on Base Layer.",
+                    "PlayerAnimator must contain the configured Idle, Run, Jump, Fall, and Attack states on Base Layer.",
                     this);
                 return false;
             }
