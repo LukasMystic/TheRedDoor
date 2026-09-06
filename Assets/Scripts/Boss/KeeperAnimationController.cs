@@ -16,6 +16,7 @@ namespace TheRedDoor.Boss
         [SerializeField] private string chargeStateName = "Keeper_Charge";
         [SerializeField] private string groundSlamStateName = "Keeper_GroundSlam";
         [SerializeField] private string heavyStrikeStateName = "Keeper_HeavyStrike";
+        [SerializeField] private string deathStateName = "Keeper_Death";
 
         [Header("Tuning")]
         [SerializeField, Min(0f)] private float crossFadeDuration = 0.05f;
@@ -26,6 +27,7 @@ namespace TheRedDoor.Boss
         private int chargeStateHash;
         private int groundSlamStateHash;
         private int heavyStrikeStateHash;
+        private int deathStateHash;
         private int currentStateHash;
 
         private void Awake()
@@ -38,6 +40,7 @@ namespace TheRedDoor.Boss
             chargeStateHash = HashStateName(chargeStateName);
             groundSlamStateHash = HashStateName(groundSlamStateName);
             heavyStrikeStateHash = HashStateName(heavyStrikeStateName);
+            deathStateHash = HashStateName(deathStateName);
         }
 
         private void Start()
@@ -64,6 +67,9 @@ namespace TheRedDoor.Boss
         private int SelectAnimationState()
         {
             KeeperController.State state = controller.CurrentState;
+            if (state == KeeperController.State.Defeated)
+                return deathStateHash;
+
             if (state == KeeperController.State.Telegraph || state == KeeperController.State.Swipe)
                 return attackOneStateHash;
 
@@ -105,11 +111,12 @@ namespace TheRedDoor.Boss
                 || !animator.HasState(0, attackOneStateHash)
                 || !animator.HasState(0, chargeStateHash)
                 || !animator.HasState(0, groundSlamStateHash)
-                || !animator.HasState(0, heavyStrikeStateHash))
+                || !animator.HasState(0, heavyStrikeStateHash)
+                || !animator.HasState(0, deathStateHash))
             {
                 Debug.LogError(
                     "KeeperAnimator must contain the configured Idle, Attack 1, Charge, Ground Slam, and " +
-                    "Heavy Strike states on Base Layer.",
+                    "Heavy Strike, and Death states on Base Layer.",
                     this);
                 return false;
             }
