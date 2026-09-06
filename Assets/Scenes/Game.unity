@@ -445,6 +445,11 @@ MonoBehaviour:
   onDied:
     m_PersistentCalls:
       m_Calls: []
+--- !u!4 &361076037 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7740381410797950796, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
+  m_PrefabInstance: {fileID: 5725785860005943220}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &486515331
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,6 +573,7 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
+  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -693,6 +699,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519420033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a669f9289bb4a2195b4b485c30afcac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.World.CameraFollow2D
+  target: {fileID: 361076037}
+  horizontalOffset: 0
+  smoothTime: 0.15
+  useHorizontalBounds: 0
+  horizontalBounds: {x: -10, y: 10}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -950,7 +973,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage:
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -2263,12 +2286,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 73ef811dcf7243518ad59864b2b40a17, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Boss.KeeperAnimationController
   animator: {fileID: 864856864}
   layerName: Base Layer
   idleStateName: Keeper_Idle
   attackOneStateName: Keeper_Attack1
+  chargeStateName: Keeper_Charge
+  groundSlamStateName: Keeper_GroundSlam
+  heavyStrikeStateName: Keeper_HeavyStrike
+  deathStateName: Keeper_Death
   crossFadeDuration: 0.05
 --- !u!1001 &5725785860005943220
 PrefabInstance:
