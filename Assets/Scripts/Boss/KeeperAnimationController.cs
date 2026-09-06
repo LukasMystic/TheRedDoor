@@ -13,6 +13,7 @@ namespace TheRedDoor.Boss
         [SerializeField] private string layerName = "Base Layer";
         [SerializeField] private string idleStateName = "Keeper_Idle";
         [SerializeField] private string attackOneStateName = "Keeper_Attack1";
+        [SerializeField] private string chargeStateName = "Keeper_Charge";
 
         [Header("Tuning")]
         [SerializeField, Min(0f)] private float crossFadeDuration = 0.05f;
@@ -20,6 +21,7 @@ namespace TheRedDoor.Boss
         private KeeperController controller;
         private int idleStateHash;
         private int attackOneStateHash;
+        private int chargeStateHash;
         private int currentStateHash;
 
         private void Awake()
@@ -29,6 +31,7 @@ namespace TheRedDoor.Boss
 
             idleStateHash = HashStateName(idleStateName);
             attackOneStateHash = HashStateName(attackOneStateName);
+            chargeStateHash = HashStateName(chargeStateName);
         }
 
         private void Start()
@@ -58,9 +61,12 @@ namespace TheRedDoor.Boss
             if (state == KeeperController.State.Telegraph || state == KeeperController.State.Swipe)
                 return attackOneStateHash;
 
-            // Let an attack finish its authored return pose during that attack's recovery.
-            if (state == KeeperController.State.Recovery && currentStateHash != 0)
-                return currentStateHash;
+            if (state == KeeperController.State.Charge)
+                return chargeStateHash;
+
+            // Swipe has an authored return pose; charge should return to Idle as soon as movement stops.
+            if (state == KeeperController.State.Recovery && currentStateHash == attackOneStateHash)
+                return attackOneStateHash;
 
             return idleStateHash;
         }
@@ -78,10 +84,12 @@ namespace TheRedDoor.Boss
                 return false;
             }
 
-            if (!animator.HasState(0, idleStateHash) || !animator.HasState(0, attackOneStateHash))
+            if (!animator.HasState(0, idleStateHash)
+                || !animator.HasState(0, attackOneStateHash)
+                || !animator.HasState(0, chargeStateHash))
             {
                 Debug.LogError(
-                    "KeeperAnimator must contain the configured Idle and Attack 1 states on Base Layer.",
+                    "KeeperAnimator must contain the configured Idle, Attack 1, and Charge states on Base Layer.",
                     this);
                 return false;
             }
