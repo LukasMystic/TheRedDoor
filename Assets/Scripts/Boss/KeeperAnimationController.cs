@@ -15,6 +15,7 @@ namespace TheRedDoor.Boss
         [SerializeField] private string attackOneStateName = "Keeper_Attack1";
         [SerializeField] private string chargeStateName = "Keeper_Charge";
         [SerializeField] private string groundSlamStateName = "Keeper_GroundSlam";
+        [SerializeField] private string heavyStrikeStateName = "Keeper_HeavyStrike";
 
         [Header("Tuning")]
         [SerializeField, Min(0f)] private float crossFadeDuration = 0.05f;
@@ -24,6 +25,7 @@ namespace TheRedDoor.Boss
         private int attackOneStateHash;
         private int chargeStateHash;
         private int groundSlamStateHash;
+        private int heavyStrikeStateHash;
         private int currentStateHash;
 
         private void Awake()
@@ -35,6 +37,7 @@ namespace TheRedDoor.Boss
             attackOneStateHash = HashStateName(attackOneStateName);
             chargeStateHash = HashStateName(chargeStateName);
             groundSlamStateHash = HashStateName(groundSlamStateName);
+            heavyStrikeStateHash = HashStateName(heavyStrikeStateName);
         }
 
         private void Start()
@@ -64,15 +67,20 @@ namespace TheRedDoor.Boss
             if (state == KeeperController.State.Telegraph || state == KeeperController.State.Swipe)
                 return attackOneStateHash;
 
-            if (state == KeeperController.State.Charge)
+            if (state == KeeperController.State.Charge || state == KeeperController.State.HeavyAdvance)
                 return chargeStateHash;
 
             if (state == KeeperController.State.SlamTelegraph || state == KeeperController.State.Slam)
                 return groundSlamStateHash;
 
-            // Swipe and slam have authored return poses; charge should return to Idle when movement stops.
+            if (state == KeeperController.State.HeavyWindup || state == KeeperController.State.HeavyStrike)
+                return heavyStrikeStateHash;
+
+            // Stationary attacks have authored return poses; moving attacks return to Idle when movement stops.
             if (state == KeeperController.State.Recovery
-                && (currentStateHash == attackOneStateHash || currentStateHash == groundSlamStateHash))
+                && (currentStateHash == attackOneStateHash
+                    || currentStateHash == groundSlamStateHash
+                    || currentStateHash == heavyStrikeStateHash))
             {
                 return currentStateHash;
             }
@@ -96,11 +104,12 @@ namespace TheRedDoor.Boss
             if (!animator.HasState(0, idleStateHash)
                 || !animator.HasState(0, attackOneStateHash)
                 || !animator.HasState(0, chargeStateHash)
-                || !animator.HasState(0, groundSlamStateHash))
+                || !animator.HasState(0, groundSlamStateHash)
+                || !animator.HasState(0, heavyStrikeStateHash))
             {
                 Debug.LogError(
-                    "KeeperAnimator must contain the configured Idle, Attack 1, Charge, and Ground Slam states " +
-                    "on Base Layer.",
+                    "KeeperAnimator must contain the configured Idle, Attack 1, Charge, Ground Slam, and " +
+                    "Heavy Strike states on Base Layer.",
                     this);
                 return false;
             }
