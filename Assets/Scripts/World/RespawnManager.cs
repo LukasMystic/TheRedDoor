@@ -16,8 +16,21 @@ namespace TheRedDoor.World
 
         private bool isRestarting;
         private bool sceneLoadRequested;
+        private bool hasArenaCheckpoint;
+        private Vector2 arenaCheckpointPosition;
+
+        private static bool hasPendingCheckpointRespawn;
+        private static string pendingCheckpointScenePath;
+        private static Vector2 pendingCheckpointPosition;
 
         public bool IsRestarting => isRestarting;
+        public bool HasArenaCheckpoint => hasArenaCheckpoint;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetPendingCheckpoint()
+        {
+            ClearPendingCheckpoint();
+        }
 
         private void Awake()
         {
@@ -26,6 +39,24 @@ namespace TheRedDoor.World
                 Debug.LogError("RespawnManager needs the scene Player's Player Health reference.", this);
                 enabled = false;
             }
+        }
+
+        private void Start()
+        {
+            if (!hasPendingCheckpointRespawn)
+                return;
+
+            string scenePath = gameObject.scene.path;
+            if (pendingCheckpointScenePath != scenePath)
+            {
+                ClearPendingCheckpoint();
+                return;
+            }
+
+            hasArenaCheckpoint = true;
+            arenaCheckpointPosition = pendingCheckpointPosition;
+            ClearPendingCheckpoint();
+            MovePlayerToArenaCheckpoint();
         }
 
         private void Update()
@@ -46,6 +77,27 @@ namespace TheRedDoor.World
             }
         }
 
+        public bool TryActivateArenaCheckpoint(PlayerHealth enteringPlayer, Vector2 respawnPosition)
+        {
+            if (!Application.isPlaying || enteringPlayer == null ||
+                enteringPlayer.gameObject != playerHealth.gameObject ||
+                playerHealth.IsDead || isRestarting)
+                return false;
+
+            hasArenaCheckpoint = true;
+            arenaCheckpointPosition = respawnPosition;
+            return true;
+        }
+
+        public bool TryKillPlayerFromHazard(PlayerHealth enteringPlayer, Vector2 hazardPosition)
+        {
+            if (!Application.isPlaying || enteringPlayer == null ||
+                enteringPlayer.gameObject != playerHealth.gameObject || isRestarting)
+                return false;
+
+            return playerHealth.Kill(hazardPosition);
+        }
+
         private IEnumerator RestartAfterDelay(string scenePath)
         {
             yield return new WaitForSecondsRealtime(Mathf.Max(0f, restartDelay));
@@ -56,8 +108,19 @@ namespace TheRedDoor.World
                 yield break;
             }
 
-            // Single-mode reload restores all authored scene state: player, dummy, and timers.
-            // Arena checkpoints will be added before this scene contains a tutorial section.
+            // Single-mode reload restores the encounter. Carry only the arena spawn position
+            // through that one reload so a retry does not repeat the tutorial course.
+            if (hasArenaCheckpoint)
+            {
+                hasPendingCheckpointRespawn = true;
+                pendingCheckpointScenePath = scenePath;
+                pendingCheckpointPosition = arenaCheckpointPosition;
+            }
+            else
+            {
+                ClearPendingCheckpoint();
+            }
+
             sceneLoadRequested = true;
             Time.timeScale = 1f;
             try
@@ -69,8 +132,35 @@ namespace TheRedDoor.World
             {
                 Debug.LogError($"RespawnManager failed to reload '{scenePath}': {exception.Message}", this);
                 sceneLoadRequested = false;
+                ClearPendingCheckpoint();
                 enabled = false;
             }
+        }
+
+        private void MovePlayerToArenaCheckpoint()
+        {
+            Vector3 playerPosition = playerHealth.transform.position;
+            playerPosition.x = arenaCheckpointPosition.x;
+            playerPosition.y = arenaCheckpointPosition.y;
+            playerHealth.transform.position = playerPosition;
+
+            Rigidbody2D body = playerHealth.GetComponent<Rigidbody2D>();
+            if (body != null)
+            {
+                body.position = arenaCheckpointPosition;
+                body.linearVelocity = Vector2.zero;
+                body.angularVelocity = 0f;
+                body.WakeUp();
+            }
+
+            Physics2D.SyncTransforms();
+        }
+
+        private static void ClearPendingCheckpoint()
+        {
+            hasPendingCheckpointRespawn = false;
+            pendingCheckpointScenePath = null;
+            pendingCheckpointPosition = Vector2.zero;
         }
 
         private void OnDisable()

@@ -77,6 +77,22 @@ namespace TheRedDoor.Player
                 IsDead || IsInvulnerable || amount <= 0)
                 return false;
 
+            ApplyDamage(amount, damageSource);
+            return true;
+        }
+
+        // Falling out of the level must end the attempt even during dash or post-hit invulnerability.
+        public bool Kill(Vector2 damageSource)
+        {
+            if (!Application.isPlaying || !isActiveAndEnabled || Time.timeScale <= 0f || IsDead)
+                return false;
+
+            ApplyDamage(currentHealth, damageSource);
+            return true;
+        }
+
+        private void ApplyDamage(int amount, Vector2 damageSource)
+        {
             currentHealth = Mathf.Max(0, currentHealth - amount);
             invulnerableUntil = Time.time + Mathf.Max(0f, invulnerabilityDuration);
 
@@ -98,8 +114,6 @@ namespace TheRedDoor.Player
             onDamaged.Invoke();
             if (diedFromThisHit)
                 onDied.Invoke();
-
-            return true;
         }
 
         private void FlashSprite()

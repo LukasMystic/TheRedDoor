@@ -14,6 +14,8 @@ namespace TheRedDoor.World
         [SerializeField] private float horizontalOffset;
         [Tooltip("Seconds used to ease toward the target. Set to 0 for immediate movement.")]
         [SerializeField, Min(0f)] private float smoothTime = 0.15f;
+        [Tooltip("Place the camera on the Player before the first frame instead of travelling from its saved scene position.")]
+        [SerializeField] private bool snapOnStart = true;
 
         [Header("Level Bounds")]
         [Tooltip("Enable after the level edges have been blocked out.")]
@@ -22,6 +24,7 @@ namespace TheRedDoor.World
         [SerializeField] private Vector2 horizontalBounds = new(-10f, 10f);
 
         private float horizontalVelocity;
+        private bool shouldSnap;
 
         private void Awake()
         {
@@ -30,6 +33,11 @@ namespace TheRedDoor.World
                 Debug.LogError("CameraFollow2D needs the scene Player root as its Target.", this);
                 enabled = false;
             }
+        }
+
+        private void OnEnable()
+        {
+            shouldSnap = snapOnStart;
         }
 
         private void LateUpdate()
@@ -44,9 +52,17 @@ namespace TheRedDoor.World
             if (useHorizontalBounds)
                 desiredX = Mathf.Clamp(desiredX, minimumX, maximumX);
 
-            float nextX = smoothTime <= 0f
-                ? desiredX
-                : Mathf.SmoothDamp(transform.position.x, desiredX, ref horizontalVelocity, smoothTime);
+            float nextX;
+            if (shouldSnap || smoothTime <= 0f)
+            {
+                nextX = desiredX;
+                horizontalVelocity = 0f;
+                shouldSnap = false;
+            }
+            else
+            {
+                nextX = Mathf.SmoothDamp(transform.position.x, desiredX, ref horizontalVelocity, smoothTime);
+            }
 
             if (useHorizontalBounds)
                 nextX = Mathf.Clamp(nextX, minimumX, maximumX);
