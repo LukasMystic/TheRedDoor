@@ -921,7 +921,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: -9177396766611555106, guid: cceb75fa7711a442488164b0e8a1de0b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1995,6 +1995,7 @@ GameObject:
   - component: {fileID: 2089422139}
   - component: {fileID: 2089422143}
   - component: {fileID: 2089422144}
+  - component: {fileID: 2089422145}
   m_Layer: 6
   m_Name: CombatDummy
   m_TagString: Untagged
@@ -2216,7 +2217,7 @@ MonoBehaviour:
   chainedRecoveryMultiplier: 0.4
   arenaXLimits: {x: -6.5, y: 6.5}
   collisionSkin: 0.02
-  spriteFacesRight: 1
+  spriteFacesRight: 0
   telegraphColor: {r: 1, g: 0.65, b: 0.1, a: 1}
   swipeColor: {r: 1, g: 0.2, b: 0.2, a: 1}
   chargeTelegraphColor: {r: 0.3, g: 0.75, b: 1, a: 1}
@@ -2252,6 +2253,23 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
+--- !u!114 &2089422145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089422138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73ef811dcf7243518ad59864b2b40a17, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Boss.KeeperAnimationController
+  animator: {fileID: 864856864}
+  layerName: Base Layer
+  idleStateName: Keeper_Idle
+  attackOneStateName: Keeper_Attack1
+  crossFadeDuration: 0.05
 --- !u!1001 &5725785860005943220
 PrefabInstance:
   m_ObjectHideFlags: 0
