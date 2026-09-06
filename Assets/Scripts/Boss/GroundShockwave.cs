@@ -13,7 +13,7 @@ namespace TheRedDoor.Boss
         [SerializeField, Min(0.01f)] private float speed = 6f;
         [SerializeField, Min(0.01f)] private float travelDistance = 7f;
         [SerializeField, Min(0.01f)] private float maxLifetime = 2f;
-        [Tooltip("Full hitbox size in world units. The centered root sprite is resized to match on launch.")]
+        [Tooltip("Full hitbox size in world units. The centered root sprite is fitted inside it on launch.")]
         [SerializeField] private Vector2 hitboxSize = new(0.8f, 0.45f);
         [Tooltip("Distance above the flat floor. Keep small so grounded players cannot stand below the wave.")]
         [SerializeField, Min(0.001f)] private float groundClearance = 0.02f;
@@ -65,9 +65,13 @@ namespace TheRedDoor.Boss
             remainingLifetime = Mathf.Max(0.01f, maxLifetime);
 
             // This prefab uses a centered sprite, not a physical collider that could block the player.
-            Vector3 spriteSize = GetComponent<SpriteRenderer>().sprite.bounds.size;
-            transform.localScale = new Vector3(size.x / Mathf.Max(0.001f, spriteSize.x),
-                size.y / Mathf.Max(0.001f, spriteSize.y), 1f);
+            // A uniform scale preserves authored proportions while keeping the art inside the hitbox.
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            Vector3 spriteSize = spriteRenderer.sprite.bounds.size;
+            float visualScale = Mathf.Min(size.x / Mathf.Max(0.001f, spriteSize.x),
+                size.y / Mathf.Max(0.001f, spriteSize.y));
+            transform.localScale = new Vector3(visualScale, visualScale, 1f);
+            spriteRenderer.flipX = direction.x < 0f;
             running = true;
         }
 
