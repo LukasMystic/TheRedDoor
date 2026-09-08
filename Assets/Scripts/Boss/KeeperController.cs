@@ -263,8 +263,7 @@ namespace TheRedDoor.Boss
 
         private void FixedUpdate()
         {
-            if (body == null || !body.simulated || bodyCollider == null || !bodyCollider.enabled ||
-                health == null || !health.isActiveAndEnabled)
+            if (health == null || !health.isActiveAndEnabled)
             {
                 ClearShockwave();
                 SetState(State.Idle);
@@ -275,6 +274,14 @@ namespace TheRedDoor.Boss
             {
                 ClearShockwave();
                 SetState(State.Defeated);
+                return;
+            }
+
+            // Defeat presentation remains active even after the arena gate disables the solid body collider.
+            if (body == null || !body.simulated || bodyCollider == null || !bodyCollider.enabled)
+            {
+                ClearShockwave();
+                SetState(State.Idle);
                 return;
             }
 

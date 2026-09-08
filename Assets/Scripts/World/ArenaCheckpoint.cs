@@ -1,3 +1,4 @@
+using System;
 using TheRedDoor.Player;
 using UnityEngine;
 
@@ -14,6 +15,9 @@ namespace TheRedDoor.World
 
         private BoxCollider2D triggerCollider;
         private bool isActivated;
+
+        public bool IsActivated => isActivated;
+        public event Action Activated;
 
         private void Reset()
         {
@@ -47,7 +51,10 @@ namespace TheRedDoor.World
 
             PlayerHealth enteringPlayer = other.GetComponentInParent<PlayerHealth>();
             if (respawnManager.TryActivateArenaCheckpoint(enteringPlayer, respawnPoint.position))
+            {
                 isActivated = true;
+                Activated?.Invoke();
+            }
         }
 
         private void OnDrawGizmosSelected()
