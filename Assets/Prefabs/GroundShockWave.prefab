@@ -80,10 +80,10 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -894820518157784494, guid: 08e32e7e4e4924ce4919f9e75e5ce50b, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.41568628, b: 0.101960786, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -110,3 +110,4 @@ MonoBehaviour:
   maxLifetime: 2
   hitboxSize: {x: 0.8, y: 0.45}
   groundClearance: 0.02
+  visualScaleMultiplier: 1.5

@@ -17,6 +17,8 @@ namespace TheRedDoor.Boss
         [SerializeField] private Vector2 hitboxSize = new(0.8f, 0.45f);
         [Tooltip("Distance above the flat floor. Keep small so grounded players cannot stand below the wave.")]
         [SerializeField, Min(0.001f)] private float groundClearance = 0.02f;
+        [Tooltip("Presentation only. Values above 1 make the artwork larger than the damage hitbox, giving players a forgiving warning silhouette.")]
+        [SerializeField, Min(0.1f)] private float visualScaleMultiplier = 1.5f;
 
         private readonly List<Collider2D> overlaps = new(8);
         private readonly List<RaycastHit2D> hits = new(8);
@@ -70,6 +72,7 @@ namespace TheRedDoor.Boss
             Vector3 spriteSize = spriteRenderer.sprite.bounds.size;
             float visualScale = Mathf.Min(size.x / Mathf.Max(0.001f, spriteSize.x),
                 size.y / Mathf.Max(0.001f, spriteSize.y));
+            visualScale *= Mathf.Max(0.1f, visualScaleMultiplier);
             transform.localScale = new Vector3(visualScale, visualScale, 1f);
             spriteRenderer.flipX = direction.x < 0f;
             running = true;
