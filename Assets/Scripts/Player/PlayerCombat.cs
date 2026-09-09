@@ -48,6 +48,7 @@ namespace TheRedDoor.Player
 
         public bool IsAttacking => state != AttackState.Ready;
         public bool IsHitboxActive => state == AttackState.Active;
+        public UnityEvent AttackStarted => onAttackStarted;
 
         private bool CanReadAttackInput => Application.isPlaying && isActiveAndEnabled &&
             controller != null && controller.isActiveAndEnabled && !controller.IsControlLocked &&

@@ -1146,6 +1146,81 @@ Transform:
   - {fileID: 1573501193}
   m_Father: {fileID: 1100396902}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &284058768
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 284058770}
+  - component: {fileID: 284058769}
+  m_Layer: 0
+  m_Name: GameAudio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &284058769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284058768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1d1a3820e294460fa71acfb6b493c2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Audio.DemoAudio
+  player: {fileID: 361076040}
+  playerHealth: {fileID: 361076036}
+  combat: {fileID: 361076039}
+  keeper: {fileID: 2089422143}
+  keeperHealth: {fileID: 2089422139}
+  respawnManager: {fileID: 253008076}
+  gate: {fileID: 2082715811}
+  door: {fileID: 486515332}
+  explorationMusic: {fileID: 8300000, guid: db3caca369b4d441281e9b8c747676a3, type: 3}
+  battleMusic: {fileID: 8300000, guid: 32f9e987802844e61aa1d34eac0f87c8, type: 3}
+  forestAmbience: {fileID: 8300000, guid: 320dec16598ba4d8bb0b55e3c8f3b46c, type: 3}
+  musicFadeSeconds: 1.2
+  footsteps:
+  - {fileID: 8300000, guid: 481dce212159f4f8885ab95d1107146f, type: 3}
+  - {fileID: 8300000, guid: 5fa7e19fc5781492ebab3cacaac73c6f, type: 3}
+  jump: {fileID: 8300000, guid: cffab215716164b589d9d203393c0c0f, type: 3}
+  dash: {fileID: 8300000, guid: d42734ea424b648b683de3af6843cc4f, type: 3}
+  swordSwing: {fileID: 8300000, guid: af348add020234d2a8f579f72fb8bb98, type: 3}
+  playerHit: {fileID: 8300000, guid: bedd9656276e64513b8fd73da6c99716, type: 3}
+  keeperHit: {fileID: 8300000, guid: 468e62f23ee13442bbf5bc4cd1cf0f10, type: 3}
+  keeperWindup: {fileID: 8300000, guid: 14b952a116cbd4d298b0d5ed45d96a3e, type: 3}
+  keeperSwing: {fileID: 8300000, guid: 31917ea49545d485cbd87be9f9abf74c, type: 3}
+  groundSlam: {fileID: 8300000, guid: c735ef5d9f763482e94447252c4a031c, type: 3}
+  gateClose: {fileID: 8300000, guid: d4ddc1fff25534dc39c72afa6be2a580, type: 3}
+  gateOpen: {fileID: 8300000, guid: c461b82d409b6480dbfef65f1fece6c4, type: 3}
+  doorOpen: {fileID: 8300000, guid: d445ca71e32824cd2ae562079f6bf814, type: 3}
+  victory: {fileID: 8300000, guid: 97a1b59d9e9ae452aa0b4cf8331024a3, type: 3}
+  masterVolume: 0.8
+  musicVolume: 0.24
+  ambienceVolume: 0.12
+  sfxVolume: 0.7
+--- !u!4 &284058770
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284058768}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &312032746
 GameObject:
   m_ObjectHideFlags: 0
@@ -1213,7 +1288,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4291619057
   m_fontColor: {r: 0.94509804, g: 0.9098039, b: 0.8, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -1429,6 +1504,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7740381410797950796, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
   m_PrefabInstance: {fileID: 5725785860005943220}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &361076039 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4230514529362291998, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
+  m_PrefabInstance: {fileID: 5725785860005943220}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361076029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0464c91954d418a93446c17c9e72ed6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Player.PlayerCombat
+--- !u!114 &361076040 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5863697910963683827, guid: 30e97f44f45d44b3ab66650fb50d1719, type: 3}
+  m_PrefabInstance: {fileID: 5725785860005943220}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361076029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30bb4d3053ca45379ac4bf29da73ae72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Player.PlayerController
 --- !u!1 &406797660
 GameObject:
   m_ObjectHideFlags: 0
@@ -1969,6 +2066,13 @@ MonoBehaviour:
   snapOnStart: 1
   useHorizontalBounds: 0
   horizontalBounds: {x: -10, y: 10}
+  shakeScale: 1
+  shakeAxisWeights: {x: 0.6, y: 1}
+  maxShakeOffset: 0.6
+  impactFrequency: 30
+  rumbleFrequency: 13
+  rumbleFadeDuration: 0.14
+  rumbleHoldDuration: 0.12
 --- !u!1 &537546528
 GameObject:
   m_ObjectHideFlags: 0
@@ -3369,7 +3473,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4291619057
   m_fontColor: {r: 0.94509804, g: 0.9098039, b: 0.8, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -3697,7 +3801,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4291619057
   m_fontColor: {r: 0.94509804, g: 0.9098039, b: 0.8, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -3715,7 +3819,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32
+  m_fontSize: 24.25
   m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5630,7 +5734,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4291619057
   m_fontColor: {r: 0.94509804, g: 0.9098039, b: 0.8, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -6561,7 +6665,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4291619057
   m_fontColor: {r: 0.94509804, g: 0.9098039, b: 0.8, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -8038,6 +8142,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 864856863}
   activationRange: 2.3
   maxVerticalDistance: 1.5
+  pursueAcrossArena: 1
   damage: 1
   hitboxOffset: {x: 0.9, y: 0}
   hitboxSize: {x: 1.4, y: 1.1}
@@ -8048,6 +8153,7 @@ MonoBehaviour:
   chargeTelegraphDuration: 0.85
   chargeSpeed: 9
   chargeDuration: 0.65
+  chargeReachesArenaEdge: 1
   chargeRecoveryDuration: 1.4
   chargeDamage: 1
   shockwavePrefab: {fileID: 3694800349384956809, guid: b003fbb6690c94f5dbf366482ebb6e84, type: 3}
@@ -8055,6 +8161,12 @@ MonoBehaviour:
   slamTelegraphDuration: 0.9
   slamActiveDuration: 0.2
   slamRecoveryDuration: 1.6
+  shakeCamera: {fileID: 0}
+  slamShakeStrength: 0.22
+  slamShakeDuration: 0.35
+  heavyShakeStrength: 0.35
+  heavyShakeDuration: 0.3
+  approachShakeStrength: 0.12
   heavyStrikeEnabled: 1
   attacksBetweenHeavyStrikes: 3
   heavyActivationRange: 4.5
@@ -8091,6 +8203,7 @@ MonoBehaviour:
     specialAttackIntervalReduction: 1
   chainedRecoveryMultiplier: 0.4
   arenaXLimits: {x: -6.5, y: 6.5}
+  fitLimitsToFloor: 1
   collisionSkin: 0.02
   spriteFacesRight: 0
   telegraphColor: {r: 1, g: 0.65, b: 0.1, a: 1}
@@ -8239,3 +8352,4 @@ SceneRoots:
   - {fileID: 1443953629}
   - {fileID: 115022671}
   - {fileID: 942482594}
+  - {fileID: 284058770}

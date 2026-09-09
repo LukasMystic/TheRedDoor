@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using TheRedDoor.Boss;
+using TheRedDoor.Audio;
 using TheRedDoor.Player;
 using TheRedDoor.UI;
 using TheRedDoor.World;
@@ -12,8 +13,22 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
+[InitializeOnLoad]
 public static class PresentationPass
 {
+    static PresentationPass()
+    {
+        EditorApplication.playModeStateChanged += state =>
+        {
+            if (state == PlayModeStateChange.EnteredPlayMode && SessionState.GetBool("TheRedDoor.AudioTest", false))
+            {
+                SessionState.SetBool("TheRedDoor.AudioTest", false);
+                audioStep = 0;
+                audioStart = EditorApplication.timeSinceStartup;
+                EditorApplication.update += AudioTick;
+            }
+        };
+    }
     const string Moss = "Assets/Entity/Env/Mossy Tileset/";
     static Color Hex(string hex) { ColorUtility.TryParseHtmlString(hex, out var c); return c; }
     static Sprite SpriteAt(string path, string suffix) => AssetDatabase.LoadAllAssetsAtPath(path)
@@ -306,5 +321,141 @@ public static class PresentationPass
         Check(keeper.transform.position == rootPosition, "Death anchoring never moves boss root");
         Debug.Log("WAVE COLLISION AND DEATH FRAME CHECKS COMPLETE. Stop Play without saving.");
         EditorApplication.isPlaying = false;
+    }
+
+    [MenuItem("Tools/TheRedDoor/Install And Test Audio")]
+    static void InstallAudio()
+    {
+        if (EditorApplication.isPlaying) throw new Exception("Stop Play before installing audio.");
+        var existing = GameObject.Find("GameAudio");
+        if (existing == null)
+        {
+            existing = new GameObject("GameAudio");
+            Undo.RegisterCreatedObjectUndo(existing, "Add demo audio");
+        }
+        var audio = existing.GetComponent<DemoAudio>();
+        if (audio == null) audio = Undo.AddComponent<DemoAudio>(existing);
+        var keeper = UnityEngine.Object.FindAnyObjectByType<KeeperController>();
+        var playerHealth = Field<PlayerHealth>(keeper, "target");
+        var so = new SerializedObject(audio);
+        void Ref(string name, UnityEngine.Object value) => so.FindProperty(name).objectReferenceValue = value;
+        Ref("player", playerHealth.GetComponent<PlayerController>());
+        Ref("playerHealth", playerHealth);
+        Ref("combat", playerHealth.GetComponent<PlayerCombat>());
+        Ref("keeper", keeper);
+        Ref("keeperHealth", keeper.GetComponent<BossHealth>());
+        Ref("respawnManager", UnityEngine.Object.FindAnyObjectByType<RespawnManager>());
+        Ref("gate", UnityEngine.Object.FindAnyObjectByType<ArenaGate>());
+        Ref("door", UnityEngine.Object.FindAnyObjectByType<RedDoor>());
+        AudioClip Clip(string path) => AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/" + path);
+        Ref("explorationMusic", Clip("Music/Peaceful_Forest.wav"));
+        Ref("battleMusic", Clip("Music/Medieval_Battle.mp3"));
+        Ref("forestAmbience", Clip("Music/Forest_Ambience.mp3"));
+        var feet = so.FindProperty("footsteps");
+        feet.arraySize = 2;
+        feet.GetArrayElementAtIndex(0).objectReferenceValue = Clip("SFX/KenneyImpact/footstep_grass_000.ogg");
+        feet.GetArrayElementAtIndex(1).objectReferenceValue = Clip("SFX/KenneyImpact/footstep_grass_001.ogg");
+        Ref("jump", Clip("SFX/KenneyRPG/cloth1.ogg"));
+        Ref("dash", Clip("SFX/KenneyRPG/cloth2.ogg"));
+        Ref("swordSwing", Clip("SFX/KenneyRPG/knifeSlice.ogg"));
+        Ref("keeperSwing", Clip("SFX/KenneyRPG/knifeSlice2.ogg"));
+        Ref("playerHit", Clip("SFX/KenneyImpact/impactPunch_heavy_000.ogg"));
+        Ref("keeperHit", Clip("SFX/KenneyImpact/impactWood_heavy_000.ogg"));
+        Ref("keeperWindup", Clip("SFX/KenneyRPG/creak1.ogg"));
+        Ref("groundSlam", Clip("SFX/KenneyImpact/impactMining_000.ogg"));
+        Ref("gateClose", Clip("SFX/KenneyRPG/doorClose_1.ogg"));
+        Ref("gateOpen", Clip("SFX/KenneyRPG/metalLatch.ogg"));
+        Ref("doorOpen", Clip("SFX/KenneyRPG/doorOpen_1.ogg"));
+        Ref("victory", Clip("SFX/KenneyImpact/impactBell_heavy_000.ogg"));
+        so.ApplyModifiedProperties();
+        foreach (string guid in AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio" }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            var importer = (AudioImporter)AssetImporter.GetAtPath(path);
+            bool music = path.Contains("/Music/");
+            importer.forceToMono = !music;
+            var settings = importer.defaultSampleSettings;
+            settings.loadType = music ? AudioClipLoadType.Streaming : AudioClipLoadType.DecompressOnLoad;
+            settings.compressionFormat = AudioCompressionFormat.Vorbis;
+            settings.quality = music ? .75f : .9f;
+            settings.sampleRateSetting = AudioSampleRateSetting.PreserveSampleRate;
+            importer.defaultSampleSettings = settings;
+            importer.SaveAndReimport();
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            Check(clip != null && clip.length > .01f, "Imported audio " + clip.name + " (" + clip.length.ToString("F2") + "s)");
+        }
+        EditorSceneManager.MarkSceneDirty(existing.scene);
+        EditorSceneManager.SaveScene(existing.scene);
+        AssetDatabase.SaveAssets();
+        SessionState.SetBool("TheRedDoor.AudioTest", true);
+        EditorApplication.isPlaying = true;
+        Debug.Log("AUDIO INSTALLED AND SAVED. Entering a temporary verification run.");
+    }
+
+    static int audioStep;
+    static double audioStart;
+    [MenuItem("Tools/TheRedDoor/Verify Audio Output")]
+    static void VerifyAudioOutput()
+    {
+        if (EditorApplication.isPlaying) return;
+        Debug.Log("AUDIO editor mute was " + EditorUtility.audioMasterMute);
+        EditorUtility.audioMasterMute = false;
+        Debug.Log("AUDIO device reset=" + AudioSettings.Reset(AudioSettings.GetConfiguration()));
+        SessionState.SetBool("TheRedDoor.AudioTest", true);
+        EditorApplication.isPlaying = true;
+    }
+    static void AudioTick()
+    {
+        if (!EditorApplication.isPlaying) { EditorApplication.update -= AudioTick; return; }
+        double elapsed = EditorApplication.timeSinceStartup - audioStart;
+        try
+        {
+            var audio = UnityEngine.Object.FindAnyObjectByType<DemoAudio>();
+            if (audioStep == 0 && elapsed > 1.5)
+            {
+                Check(audio != null && audio.enabled, "Scene audio initializes");
+                Check(audio.GetComponentsInChildren<AudioSource>().Length == 7, "Exactly seven audio channels");
+                Check(Field<AudioSource>(audio, "explorationSource").isPlaying, "Exploration music playing");
+                Check(Field<AudioSource>(audio, "ambienceSource").isPlaying, "Forest ambience playing");
+                Debug.Log("AUDIO device: dspTime=" + AudioSettings.dspTime + ", listenerVolume=" + AudioListener.volume + ", paused=" + AudioListener.pause);
+                Check(!Field<AudioSource>(audio, "battleSource").isPlaying, "No premature boss music");
+                Field<PlayerCombat>(audio, "combat").AttackStarted.Invoke();
+                Check(Field<AudioSource>(audio, "playerSource").isPlaying, "Melee event plays SFX");
+                Invoke(Field<KeeperController>(audio, "keeper"), "SetState", KeeperController.State.Recovery, 60f);
+                audioStep++;
+            }
+            if (audioStep == 1 && elapsed > 6.2)
+            {
+                Check(Field<AudioSource>(audio, "battleSource").isPlaying, "Boss music crossfades in");
+                Check(!Field<AudioSource>(audio, "explorationSource").isPlaying, "Exploration music stops after fade");
+                float[] output = new float[1024];
+                Field<AudioSource>(audio, "battleSource").GetOutputData(output, 0);
+                float peak = output.Max(v => Mathf.Abs(v));
+                Debug.Log("AUDIO OUTPUT peak=" + peak + ", samples=" + Field<AudioSource>(audio, "battleSource").timeSamples + ", volume=" + Field<AudioSource>(audio, "battleSource").volume);
+                var listenerOutput = new float[1024];
+                AudioListener.GetOutputData(listenerOutput, 0);
+                Debug.Log("AUDIO LISTENER OUTPUT peak=" + listenerOutput.Max(v => Mathf.Abs(v)));
+                Field<BossHealth>(audio, "keeperHealth").TakeDamage(999);
+                Check(Field<AudioSource>(audio, "bossSource").isPlaying, "Boss defeat SFX plays");
+                Check(Field<AudioSource>(audio, "worldSource").isPlaying, "Victory cue plays");
+                audioStep++;
+            }
+            if (audioStep == 2 && elapsed > 8f)
+            {
+                Check(Field<AudioSource>(audio, "explorationSource").isPlaying, "Exploration music returns after victory");
+                Check(!Field<AudioSource>(audio, "battleSource").isPlaying, "Boss music stops after victory");
+                audio.enabled = false;
+                Check(audio.GetComponentsInChildren<AudioSource>().All(s => !s.isPlaying), "Disabling scene audio stops all sources");
+                Debug.Log("AUDIO TESTS COMPLETE. Test run stopped; authored scene preserved.");
+                EditorApplication.update -= AudioTick;
+                EditorApplication.isPlaying = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogException(ex);
+            EditorApplication.update -= AudioTick;
+            EditorApplication.isPlaying = false;
+        }
     }
 }
