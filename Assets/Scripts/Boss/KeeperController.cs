@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TheRedDoor.Player;
+using TheRedDoor.World;
 using UnityEngine;
 
 namespace TheRedDoor.Boss
@@ -17,6 +18,8 @@ namespace TheRedDoor.Boss
         [Tooltip("Horizontal distance between character origins that starts a warning, in world units.")]
         [SerializeField, Min(0.01f)] private float activationRange = 2.3f;
         [SerializeField, Min(0f)] private float maxVerticalDistance = 1.5f;
+        [Tooltip("Keep attacking from anywhere inside the arena. Turning this off leaves the corners past charge range safe to stand in.")]
+        [SerializeField] private bool pursueAcrossArena = true;
 
         [Header("Swipe Hitbox")]
         [SerializeField, Min(1)] private int damage = 1;
@@ -37,6 +40,8 @@ namespace TheRedDoor.Boss
         [SerializeField, Min(0.01f)] private float chargeTelegraphDuration = 0.85f;
         [SerializeField, Min(0.01f)] private float chargeSpeed = 9f;
         [SerializeField, Min(0.01f)] private float chargeDuration = 0.65f;
+        [Tooltip("Give a charge enough time to run the full arena width, so a charge started from one end can actually reach the other. Contact with the player or a wall still ends it early.")]
+        [SerializeField] private bool chargeReachesArenaEdge = true;
         [SerializeField, Min(0.01f)] private float chargeRecoveryDuration = 1.4f;
         [SerializeField, Min(1)] private int chargeDamage = 1;
 
@@ -48,6 +53,20 @@ namespace TheRedDoor.Boss
         [SerializeField, Min(0.01f)] private float slamTelegraphDuration = 0.9f;
         [SerializeField, Min(0.01f)] private float slamActiveDuration = 0.2f;
         [SerializeField, Min(0.01f)] private float slamRecoveryDuration = 1.6f;
+
+        [Header("Camera Shake")]
+        [Tooltip("Camera shaken by this boss. Leave empty to use the Main Camera's CameraFollow2D.")]
+        [SerializeField] private CameraFollow2D shakeCamera;
+        [Tooltip("Peak slam shake offset in world units, before the camera's own Shake Scale. Set to 0 to disable.")]
+        [SerializeField, Min(0f)] private float slamShakeStrength = 0.55f;
+        [Tooltip("Seconds the slam shake takes to settle. Keep at or below the slam's active duration plus recovery.")]
+        [SerializeField, Min(0f)] private float slamShakeDuration = 0.45f;
+        [Tooltip("Peak heavy strike shake offset in world units. A single-target blow, so keep it under the slam.")]
+        [SerializeField, Min(0f)] private float heavyShakeStrength = 0.35f;
+        [Tooltip("Seconds the heavy strike shake takes to settle.")]
+        [SerializeField, Min(0f)] private float heavyShakeDuration = 0.3f;
+        [Tooltip("Sustained rumble while the Keeper closes distance during a charge or heavy advance. Keep well below the impact strengths.")]
+        [SerializeField, Min(0f)] private float approachShakeStrength = 0.12f;
 
         [Header("Heavy Strike")]
         [SerializeField] private bool heavyStrikeEnabled = true;
@@ -84,6 +103,8 @@ namespace TheRedDoor.Boss
         [Header("Flat Arena Limits")]
         [Tooltip("World X limits for the boss ROOT, leaving room for its collider inside the floor edges.")]
         [SerializeField] private Vector2 arenaXLimits = new(-6.5f, 6.5f);
+        [Tooltip("Widen the limits at Start to the arena floor the Keeper is standing on, so they cannot fall behind the level as it grows. Never narrows the values set above.")]
+        [SerializeField] private bool fitLimitsToFloor = true;
         [Tooltip("Small world-space gap maintained before solid obstacles or the player.")]
         [SerializeField, Min(0.001f)] private float collisionSkin = 0.02f;
 
@@ -141,6 +162,8 @@ namespace TheRedDoor.Boss
 
         private readonly List<Collider2D> overlaps = new(8);
         private readonly List<RaycastHit2D> chargeHits = new(8);
+        private readonly List<RaycastHit2D> floorHits = new(4);
+        private Vector2 shockwaveXLimits;
         private BossHealth health;
         private Rigidbody2D body;
         private Collider2D bodyCollider;
@@ -152,7 +175,8 @@ namespace TheRedDoor.Boss
         private bool preferCharge;
         private bool finishChargeAfterStep;
         private int attacksSinceSlam;
-        private GroundShockwave activeShockwave;
+        private GroundShockwave leftShockwave;
+        private GroundShockwave rightShockwave;
         private int attacksSinceHeavyStrike;
         private float heavyDestinationX;
         private bool finishHeavyAdvanceAfterStep;
@@ -208,8 +232,63 @@ namespace TheRedDoor.Boss
                 shockwavePrefab = null;
             }
 
+            shockwaveXLimits = arenaXLimits;
             originalColor = spriteRenderer.color;
             visualCached = true;
+        }
+
+        private void Start()
+        {
+            if (fitLimitsToFloor)
+                FitLimitsToFloor();
+        }
+
+        // The hand-set limits were narrower than the arena floor, which left a strip at each end that the
+        // Keeper could not walk into and no wave could reach: a safe spot created by the numbers drifting
+        // behind the level, not by anything the player did. Measuring the floor at Start keeps reach and
+        // level in step. Only widens, so a deliberately tighter fighting area set in the Inspector survives.
+        private void FitLimitsToFloor()
+        {
+            Bounds bounds = bodyCollider.bounds;
+            ContactFilter2D filter = new() { useTriggers = false };
+            filter.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
+
+            // Start just inside the feet so the boss's own collider is not the first thing hit.
+            Vector2 origin = new(bounds.center.x, bounds.min.y + 0.05f);
+            int count = Physics2D.Raycast(origin, Vector2.down, filter, floorHits, 2f);
+
+            Collider2D floor = null;
+            float nearest = float.PositiveInfinity;
+            for (int i = 0; i < count; i++)
+            {
+                RaycastHit2D hit = floorHits[i];
+                if (hit.collider == null || hit.collider.attachedRigidbody == body)
+                    continue;
+                if (hit.distance < nearest)
+                {
+                    nearest = hit.distance;
+                    floor = hit.collider;
+                }
+            }
+
+            if (floor == null)
+            {
+                Debug.LogWarning("KeeperController found no floor under the boss, so Arena X Limits stay as configured.", this);
+                return;
+            }
+
+            Bounds floorBounds = floor.bounds;
+
+            // Waves are clamped by their own half width inside Launch, so they get the raw floor span and
+            // stop against whatever solid geometry they meet, such as the arena gate.
+            shockwaveXLimits = new Vector2(floorBounds.min.x, floorBounds.max.x);
+
+            // The root keeps its own collider inside the floor. Walls are handled by the charge's obstacle
+            // cast rather than by these limits, so the Keeper can close right up against the arena gate.
+            float inset = bounds.extents.x;
+            arenaXLimits = new Vector2(
+                Mathf.Min(arenaXLimits.x, floorBounds.min.x + inset),
+                Mathf.Max(arenaXLimits.y, floorBounds.max.x - inset));
         }
 
         private void OnEnable()
@@ -299,7 +378,8 @@ namespace TheRedDoor.Boss
             if (CurrentState == State.Idle)
             {
                 // A tuned slower wave must finish before another attack can overlap it.
-                if (activeShockwave != null && activeShockwave.IsTravelling)
+                if ((leftShockwave != null && leftShockwave.IsTravelling) ||
+                    (rightShockwave != null && rightShockwave.IsTravelling))
                     return;
 
                 Vector2 distance = target.transform.position - transform.position;
@@ -310,7 +390,16 @@ namespace TheRedDoor.Boss
 
                 float horizontalDistance = Mathf.Abs(distance.x);
                 float swipeRange = Mathf.Max(0.01f, activationRange);
-                if (horizontalDistance <= Mathf.Max(swipeRange, chargeActivationRange) &&
+
+                // Beyond charge range the Keeper used to simply idle, which made the arena corners a safe
+                // place to stand and wait. Each charge closes ground toward the player, so engaging across
+                // the whole arena width removes that spot using the existing telegraphed attacks: from a far
+                // corner he lunges twice rather than reaching in one go, which still reads as a fair warning.
+                float engagementRange = Mathf.Max(swipeRange, chargeActivationRange);
+                if (pursueAcrossArena)
+                    engagementRange = Mathf.Max(engagementRange, arenaXLimits.y - arenaXLimits.x);
+
+                if (horizontalDistance <= engagementRange &&
                     Mathf.Abs(distance.y) <= Mathf.Max(0f, maxVerticalDistance))
                 {
                     UpdatePhase(false);
@@ -373,11 +462,13 @@ namespace TheRedDoor.Boss
                 else if (CurrentState == State.HeavyWindup)
                 {
                     SetState(State.HeavyStrike, heavyActiveDuration);
+                    ShakeCameraForHeavyStrike();
                 }
                 else
                 {
                     bool isCharge = CurrentState == State.ChargeTelegraph;
-                    SetState(isCharge ? State.Charge : State.Swipe, isCharge ? chargeDuration : activeDuration);
+                    SetState(isCharge ? State.Charge : State.Swipe,
+                        isCharge ? GetChargeDuration() : activeDuration);
                 }
             }
 
@@ -421,6 +512,27 @@ namespace TheRedDoor.Boss
                 BeginRecovery(recoveryDuration);
         }
 
+        // A fixed charge duration covers a fixed distance, which left the far end of the platform out of
+        // reach even once the Keeper engaged from anywhere. Sizing the window to the arena width lets one
+        // charge cross the whole floor; the charge still stops the moment it reaches the player or a wall,
+        // so nothing changes for the close-range charges that already connected.
+        private float GetChargeDuration()
+        {
+            float duration = Mathf.Max(0.01f, chargeDuration);
+            if (!chargeReachesArenaEdge)
+                return duration;
+
+            float speed = Mathf.Max(0.01f, chargeSpeed) * Mathf.Max(0.01f, attackMovementSpeedMultiplier);
+            float arenaWidth = Mathf.Max(0f, arenaXLimits.y - arenaXLimits.x);
+
+            // Size the window to the gap the Keeper actually has to close, not to the whole arena, so a
+            // wider floor does not turn every charge into a marathon. Contact or a wall still ends it early.
+            float gap = target != null
+                ? Mathf.Abs(target.transform.position.x - body.position.x) + 1f
+                : arenaWidth;
+            return Mathf.Max(duration, Mathf.Min(gap, arenaWidth) / speed);
+        }
+
         private void UpdateCharge()
         {
             if (finishChargeAfterStep || stateTimeRemaining <= 0f)
@@ -460,6 +572,8 @@ namespace TheRedDoor.Boss
             }
 
             body.MovePosition(body.position + direction * distance);
+            if (distance > 0f)
+                RumbleCameraForApproach();
             stateTimeRemaining -= Time.fixedDeltaTime;
             finishChargeAfterStep |= distance >= distanceToLimit;
             // Recovery starts next physics step, after this final bounded movement has happened.
@@ -489,6 +603,8 @@ namespace TheRedDoor.Boss
 
             // The step is harmless, including when it stops against the player's solid body.
             body.MovePosition(body.position + direction * distance);
+            if (distance > 0f)
+                RumbleCameraForApproach();
             finishHeavyAdvanceAfterStep |= distance >= remaining || distance >= distanceToLimit;
             // Let this move reach physics before starting the stationary warning next step.
         }
@@ -574,21 +690,74 @@ namespace TheRedDoor.Boss
         private void SpawnShockwave()
         {
             ClearShockwave();
+            ShakeCameraForSlam();
             if (shockwavePrefab == null)
                 return;
 
             // Spawn at the feet, independent of the boss sprite's scale or pivot.
             Bounds bounds = bodyCollider.bounds;
             Vector3 position = new(bounds.center.x, bounds.min.y, transform.position.z);
-            activeShockwave = Instantiate(shockwavePrefab, position, Quaternion.identity);
-            activeShockwave.Launch(this, target, facingDirection, arenaXLimits);
+            leftShockwave = Instantiate(shockwavePrefab, position, Quaternion.identity);
+            leftShockwave.Launch(this, target, -1f, shockwaveXLimits);
+            rightShockwave = Instantiate(shockwavePrefab, position, Quaternion.identity);
+            rightShockwave.Launch(this, target, 1f, shockwaveXLimits);
+        }
+
+        // Called at the telegraph-to-slam transition, which is the frame the impact reads on screen.
+        // Every slam calls this, including repeats, because the camera keeps the strongest live request.
+        private void ShakeCameraForSlam()
+        {
+            if (slamShakeStrength <= 0f || slamShakeDuration <= 0f)
+                return;
+
+            CameraFollow2D shakeTarget = ResolveShakeCamera();
+            if (shakeTarget != null)
+                shakeTarget.Shake(slamShakeDuration, slamShakeStrength);
+        }
+
+        // The heavy strike lands as the windup ends, which is also the frame the contact drawing appears.
+        private void ShakeCameraForHeavyStrike()
+        {
+            if (heavyShakeStrength <= 0f || heavyShakeDuration <= 0f)
+                return;
+
+            CameraFollow2D shakeTarget = ResolveShakeCamera();
+            if (shakeTarget != null)
+                shakeTarget.Shake(heavyShakeDuration, heavyShakeStrength);
+        }
+
+        // Renewed every movement step. The camera fades the rumble out by itself once the Keeper stops closing in,
+        // so no state transition has to remember to clear it.
+        private void RumbleCameraForApproach()
+        {
+            if (approachShakeStrength <= 0f)
+                return;
+
+            CameraFollow2D shakeTarget = ResolveShakeCamera();
+            if (shakeTarget != null)
+                shakeTarget.Rumble(approachShakeStrength);
+        }
+
+        private CameraFollow2D ResolveShakeCamera()
+        {
+            if (shakeCamera != null)
+                return shakeCamera;
+
+            // A missing Main Camera is retried rather than cached, so a late or replaced camera still shakes.
+            Camera mainCamera = Camera.main;
+            if (mainCamera != null)
+                shakeCamera = mainCamera.GetComponent<CameraFollow2D>();
+            return shakeCamera;
         }
 
         private void ClearShockwave()
         {
-            if (activeShockwave != null)
-                activeShockwave.Cancel();
-            activeShockwave = null;
+            if (leftShockwave != null)
+                leftShockwave.Cancel();
+            if (rightShockwave != null)
+                rightShockwave.Cancel();
+            leftShockwave = null;
+            rightShockwave = null;
         }
 
         private void UpdatePhase(bool resetChainCount)
@@ -669,18 +838,8 @@ namespace TheRedDoor.Boss
                 finishHeavyAdvanceAfterStep = false;
             if (visualCached && spriteRenderer != null)
             {
-                spriteRenderer.color = nextState switch
-                {
-                    State.Telegraph => telegraphColor,
-                    State.Swipe => swipeColor,
-                    State.ChargeTelegraph => chargeTelegraphColor,
-                    State.Charge => chargeColor,
-                    State.SlamTelegraph => slamTelegraphColor,
-                    State.Slam => slamColor,
-                    State.HeavyTelegraph or State.HeavyAdvance or State.HeavyWindup => heavyTelegraphColor,
-                    State.HeavyStrike => heavyStrikeColor,
-                    _ => originalColor
-                };
+                // Attack animations now communicate the windup. Keep debug colors in gizmos only.
+                spriteRenderer.color = originalColor;
             }
         }
 

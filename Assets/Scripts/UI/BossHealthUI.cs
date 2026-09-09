@@ -26,10 +26,16 @@ namespace TheRedDoor.UI
         private BossHealth subscribedHealth;
         private bool initialized;
         private bool encounterSeen;
+        private float targetFill = 1f;
+        private float targetAlpha;
+        private float hitPulse;
+        private Vector3 authoredScale;
+        private Color fillColor;
 
         private void Awake()
         {
             hudGroup = GetComponent<CanvasGroup>();
+            authoredScale = transform.localScale;
             Hide();
         }
 
@@ -61,6 +67,7 @@ namespace TheRedDoor.UI
             healthFill.raycastTarget = false;
             bossNameLabel.text = bossName;
             bossNameLabel.raycastTarget = false;
+            fillColor = healthFill.color;
             initialized = true;
             ConnectHealth();
         }
@@ -76,6 +83,8 @@ namespace TheRedDoor.UI
             if (subscribedHealth != null)
                 subscribedHealth.HealthChanged.RemoveListener(HandleHealthChanged);
             subscribedHealth = null;
+            transform.localScale = authoredScale;
+            hitPulse = 0f;
             Hide();
         }
 
@@ -92,6 +101,7 @@ namespace TheRedDoor.UI
 
             subscribedHealth.HealthChanged.AddListener(HandleHealthChanged);
             DrawHealth(subscribedHealth.CurrentHealth, subscribedHealth.MaxHealth);
+            healthFill.fillAmount = targetFill;
             UpdateVisibility();
         }
 
@@ -100,20 +110,30 @@ namespace TheRedDoor.UI
             // A full reset ends the old presentation; re-enabling the HUD alone does not.
             if (current >= maximum)
                 encounterSeen = false;
+            float nextFill = Mathf.Clamp01((float)current / Mathf.Max(1, maximum));
+            if (nextFill < targetFill)
+                hitPulse = 1f;
             DrawHealth(current, maximum);
             UpdateVisibility();
         }
 
         private void DrawHealth(int current, int maximum)
         {
-            if (healthFill != null)
-                healthFill.fillAmount = Mathf.Clamp01((float)current / Mathf.Max(1, maximum));
+            targetFill = Mathf.Clamp01((float)current / Mathf.Max(1, maximum));
         }
 
         private void LateUpdate()
         {
             if (initialized)
+            {
                 UpdateVisibility();
+                float dt = Time.unscaledDeltaTime;
+                hudGroup.alpha = Mathf.MoveTowards(hudGroup.alpha, targetAlpha, dt * 2.5f);
+                healthFill.fillAmount = Mathf.MoveTowards(healthFill.fillAmount, targetFill, dt * 1.8f);
+                hitPulse = Mathf.MoveTowards(hitPulse, 0f, dt * 3f);
+                healthFill.color = Color.Lerp(fillColor, new Color(1f, 0.8f, 0.45f), hitPulse * 0.55f);
+                transform.localScale = authoredScale * (1f + Mathf.Sin(hitPulse * Mathf.PI) * 0.025f);
+            }
         }
 
         private void UpdateVisibility()
@@ -123,7 +143,7 @@ namespace TheRedDoor.UI
                 playerHealth == null || !playerHealth.isActiveAndEnabled || playerHealth.IsDead)
             {
                 encounterSeen = false;
-                Hide();
+                targetAlpha = 0f;
                 return;
             }
 
@@ -133,7 +153,7 @@ namespace TheRedDoor.UI
             encounterSeen |= attacking || bossHealth.CurrentHealth < bossHealth.MaxHealth;
             if (hudGroup != null)
             {
-                hudGroup.alpha = encounterSeen ? 1f : 0f;
+                targetAlpha = encounterSeen ? 1f : 0f;
                 hudGroup.interactable = false;
                 hudGroup.blocksRaycasts = false;
             }
@@ -141,6 +161,7 @@ namespace TheRedDoor.UI
 
         private void Hide()
         {
+            targetAlpha = 0f;
             if (hudGroup == null)
                 return;
             hudGroup.alpha = 0f;

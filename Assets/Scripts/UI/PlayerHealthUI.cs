@@ -21,6 +21,11 @@ namespace TheRedDoor.UI
 
         private PlayerHealth subscribedHealth;
         private bool initialized;
+        private int previousHealth = -1;
+        private int maximumHealth = 1;
+        private float hitPulse;
+        private Vector3 imageScale;
+        private Color imageColor;
 
         private void Start()
         {
@@ -56,6 +61,8 @@ namespace TheRedDoor.UI
             if (healthLabel != null)
                 healthLabel.raycastTarget = false;
 
+            imageScale = healthImage.rectTransform.localScale;
+            imageColor = healthImage.color;
             initialized = true;
             ConnectHealth();
         }
@@ -71,6 +78,13 @@ namespace TheRedDoor.UI
             if (subscribedHealth != null)
                 subscribedHealth.HealthChanged.RemoveListener(Refresh);
             subscribedHealth = null;
+            if (initialized && healthImage != null)
+            {
+                healthImage.rectTransform.localScale = imageScale;
+                healthImage.color = imageColor;
+            }
+            previousHealth = -1;
+            hitPulse = 0f;
         }
 
         private void ConnectHealth()
@@ -90,6 +104,10 @@ namespace TheRedDoor.UI
         {
             int maximum = Mathf.Max(1, maxHealth);
             int current = Mathf.Clamp(currentHealth, 0, maximum);
+            if (previousHealth >= 0 && current != previousHealth)
+                hitPulse = 1f;
+            previousHealth = current;
+            maximumHealth = maximum;
             int lastStage = healthStages.Length - 1;
             int stageIndex;
 
@@ -108,6 +126,18 @@ namespace TheRedDoor.UI
                 healthImage.sprite = healthStages[stageIndex];
             if (healthLabel != null)
                 healthLabel.text = $"{current} / {maximum}";
+        }
+
+        private void Update()
+        {
+            if (!initialized || healthImage == null)
+                return;
+            hitPulse = Mathf.MoveTowards(hitPulse, 0f, Time.unscaledDeltaTime * 2.5f);
+            float lowHealthPulse = previousHealth > 0 && previousHealth <= maximumHealth * 0.25f
+                ? (Mathf.Sin(Time.unscaledTime * 6f) + 1f) * 0.025f : 0f;
+            healthImage.rectTransform.localScale = imageScale *
+                (1f + Mathf.Sin(hitPulse * Mathf.PI) * 0.12f + lowHealthPulse);
+            healthImage.color = Color.Lerp(imageColor, new Color(1f, 0.55f, 0.42f, imageColor.a), hitPulse * 0.6f);
         }
     }
 }

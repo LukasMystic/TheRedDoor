@@ -1,3 +1,4 @@
+using TheRedDoor.Boss;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,6 +27,8 @@ namespace TheRedDoor.Player
         [Tooltip("Wait after a dash ends before a fresh press can start another.")]
         [SerializeField, Min(0f)] private float dashCooldown = 0.6f;
         [SerializeField] private bool invulnerableDuringDash = true;
+        [Tooltip("Dash straight through the Keeper's body instead of being blocked by it.")]
+        [SerializeField] private bool dashThroughBoss = true;
 
         [Header("Ground Check")]
         [SerializeField] private Transform groundCheck;
@@ -44,6 +47,9 @@ namespace TheRedDoor.Player
         [SerializeField] private string dashActionName = "Sprint";
 
         private Rigidbody2D body;
+        private Collider2D bodyCollider;
+        private Collider2D bossCollider;
+        private bool ignoringBossCollision;
         private PlayerInput playerInput;
         private InputAction moveAction;
         private InputAction jumpAction;
@@ -74,6 +80,7 @@ namespace TheRedDoor.Player
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
+            bodyCollider = GetComponent<Collider2D>();
             playerInput = GetComponent<PlayerInput>();
             facingRoot = facingRoot != null ? facingRoot : transform;
             facingRootInitialScale = facingRoot.localScale;
@@ -107,8 +114,56 @@ namespace TheRedDoor.Player
         {
             EndDash();
             ClearInput();
+            SetBossCollisionIgnored(false); // Never leave the pair ignored behind a disabled player.
             moveAction?.Disable();
             jumpAction?.Disable();
+        }
+
+        // A dash passes through the Keeper's body. The ignore is held past the end of the dash for as long as
+        // the two shapes still overlap, because restoring collision while inside him would eject the player.
+        private void UpdateBossPassThrough()
+        {
+            if (!dashThroughBoss)
+            {
+                SetBossCollisionIgnored(false);
+                return;
+            }
+
+            // Resolved on the first dash rather than every step; the encounter has a single Keeper.
+            if (IsDashing && bossCollider == null)
+            {
+                KeeperController keeper = FindFirstObjectByType<KeeperController>();
+                if (keeper != null)
+                    bossCollider = keeper.GetComponent<Collider2D>();
+            }
+
+            if (bodyCollider == null || bossCollider == null || !bossCollider.enabled ||
+                !bossCollider.gameObject.activeInHierarchy)
+            {
+                // Unity drops an ignored pair when a collider is disabled, and the next dash re-applies it.
+                ignoringBossCollision = false;
+                return;
+            }
+
+            // Distance reports the real geometry even while the pair is ignored, unlike IsTouching.
+            bool stillInside = ignoringBossCollision && bodyCollider.Distance(bossCollider).isOverlapped;
+            SetBossCollisionIgnored(IsDashing || stillInside);
+        }
+
+        private void SetBossCollisionIgnored(bool ignored)
+        {
+            if (ignored == ignoringBossCollision)
+                return;
+
+            if (bodyCollider == null || bossCollider == null || !bodyCollider.enabled ||
+                !bossCollider.enabled)
+            {
+                ignoringBossCollision = false;
+                return;
+            }
+
+            Physics2D.IgnoreCollision(bodyCollider, bossCollider, ignored);
+            ignoringBossCollision = ignored;
         }
 
         private void Update()
@@ -151,6 +206,7 @@ namespace TheRedDoor.Player
         private void FixedUpdate()
         {
             IsGrounded = CheckGrounded();
+            UpdateBossPassThrough(); // Before the dash branch below, which returns early while dashing.
 
             if (IsDashing)
             {

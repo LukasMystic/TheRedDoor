@@ -29,11 +29,19 @@ namespace TheRedDoor.Boss
         private int heavyStrikeStateHash;
         private int deathStateHash;
         private int currentStateHash;
+        private SpriteRenderer visual;
+        private BoxCollider2D bodyCollider;
+        private Vector3 authoredVisualPosition;
+        private bool wasGrounded;
 
         private void Awake()
         {
             controller = GetComponent<KeeperController>();
             animator = animator != null ? animator : GetComponentInChildren<Animator>();
+            visual = animator != null ? animator.GetComponent<SpriteRenderer>() : null;
+            bodyCollider = GetComponent<BoxCollider2D>();
+            if (visual != null)
+                authoredVisualPosition = visual.transform.localPosition;
 
             idleStateHash = HashStateName(idleStateName);
             attackOneStateHash = HashStateName(attackOneStateName);
@@ -57,11 +65,31 @@ namespace TheRedDoor.Boss
         private void LateUpdate()
         {
             int desiredStateHash = SelectAnimationState();
-            if (desiredStateHash == currentStateHash)
-                return;
+            if (desiredStateHash != currentStateHash)
+            {
+                animator.CrossFade(desiredStateHash, Mathf.Max(0f, crossFadeDuration), 0);
+                currentStateHash = desiredStateHash;
+            }
 
-            animator.CrossFade(desiredStateHash, Mathf.Max(0f, crossFadeDuration), 0);
-            currentStateHash = desiredStateHash;
+            // Individually trimmed death drawings have different bottoms. Align the child after
+            // animation evaluation, never the root/hitbox. TransformPoint works even after the
+            // arena gate disables the defeated body's collider (when collider.bounds is empty).
+            if (visual == null || bodyCollider == null || visual.sprite == null)
+                return;
+            if (controller.CurrentState == KeeperController.State.Defeated)
+            {
+                Vector2 localFoot = bodyCollider.offset + Vector2.down * bodyCollider.size.y * 0.5f;
+                float floorY = bodyCollider.transform.TransformPoint(localFoot).y;
+                Vector3 position = visual.transform.position;
+                position.y += floorY - visual.bounds.min.y;
+                visual.transform.position = position;
+                wasGrounded = true;
+            }
+            else if (wasGrounded)
+            {
+                visual.transform.localPosition = authoredVisualPosition;
+                wasGrounded = false;
+            }
         }
 
         private int SelectAnimationState()

@@ -12,6 +12,9 @@ namespace TheRedDoor.Boss
         [SerializeField, Min(1)] private int damage = 1;
         [SerializeField, Min(0.01f)] private float speed = 6f;
         [SerializeField, Min(0.01f)] private float travelDistance = 7f;
+        [Tooltip("Run the whole way to the arena edge instead of stopping after Travel Distance, so the far end of the platform is never out of reach. Travel Distance still caps the wave when this is off.")]
+        [SerializeField] private bool travelToArenaEdge = true;
+        [Tooltip("Safety cap only. A wave crossing the arena raises its own lifetime to match, so this can never cut it short mid-platform.")]
         [SerializeField, Min(0.01f)] private float maxLifetime = 2f;
         [Tooltip("Full hitbox size in world units. The centered root sprite is fitted inside it on launch.")]
         [SerializeField] private Vector2 hitboxSize = new(0.8f, 0.45f);
@@ -19,6 +22,27 @@ namespace TheRedDoor.Boss
         [SerializeField, Min(0.001f)] private float groundClearance = 0.02f;
         [Tooltip("Presentation only. Values above 1 make the artwork larger than the damage hitbox, giving players a forgiving warning silhouette.")]
         [SerializeField, Min(0.1f)] private float visualScaleMultiplier = 1.5f;
+
+        // Everything below is presentation only. The damage test uses the fixed hitbox size and the root
+        // position, never the Transform's scale or rotation, so none of it can widen or narrow the hitbox.
+        [Header("Animation")]
+        [Tooltip("Seconds the spawn burst takes to settle into the travelling shape.")]
+        [SerializeField, Min(0f)] private float spawnDuration = 0.12f;
+        [Tooltip("Scale the artwork starts at, relative to its settled size. Narrow and tall reads as a burst out of the floor.")]
+        [SerializeField] private Vector2 spawnScale = new(0.4f, 1.7f);
+        [Tooltip("Extra scale gained by the end of the wave's travel, as a fraction. The wave spreads as it rolls out.")]
+        [SerializeField] private Vector2 travelScaleGain = new(0.4f, 0.18f);
+        [Tooltip("Vertical crest pulse, as a fraction of height. 0 leaves the wave rigid.")]
+        [SerializeField, Min(0f)] private float crestPulse = 0.14f;
+        [Tooltip("Crest pulses per second.")]
+        [SerializeField, Min(0f)] private float crestPulseFrequency = 11f;
+        [Tooltip("Degrees the wave leans in its travel direction.")]
+        [SerializeField, Range(0f, 45f)] private float leanAngle = 7f;
+        [Tooltip("Degrees of lean wobble around that lean, and its rate in cycles per second.")]
+        [SerializeField, Range(0f, 45f)] private float wobbleAngle = 4f;
+        [SerializeField, Min(0f)] private float wobbleFrequency = 6f;
+        [Tooltip("Fraction of the travel over which the wave fades out as it dies down. 0 keeps it opaque until it vanishes.")]
+        [SerializeField, Range(0f, 1f)] private float fadeOutFraction = 0.35f;
 
         private readonly List<Collider2D> overlaps = new(8);
         private readonly List<RaycastHit2D> hits = new(8);
@@ -30,6 +54,11 @@ namespace TheRedDoor.Boss
         private float remainingDistance;
         private float remainingLifetime;
         private bool running;
+        private SpriteRenderer visual;
+        private Vector3 settledScale;
+        private Color settledColor;
+        private float totalDistance;
+        private float age;
 
         public bool IsTravelling => running && isActiveAndEnabled;
         internal bool IsConfigured => enabled && gameObject.activeSelf &&
@@ -62,9 +91,16 @@ namespace TheRedDoor.Boss
             position.x = Mathf.Clamp(position.x, left, right);
             position.y += size.y * 0.5f + Mathf.Max(0.001f, groundClearance);
             transform.position = position;
-            remainingDistance = Mathf.Min(Mathf.Max(0.01f, travelDistance),
-                direction.x > 0f ? right - position.x : position.x - left);
-            remainingLifetime = Mathf.Max(0.01f, maxLifetime);
+            // The arena edge is the hard stop either way; Travel Distance only shortens the wave further.
+            float distanceToEdge = Mathf.Max(0f, direction.x > 0f ? right - position.x : position.x - left);
+            remainingDistance = travelToArenaEdge
+                ? Mathf.Max(0.01f, distanceToEdge)
+                : Mathf.Min(Mathf.Max(0.01f, travelDistance), distanceToEdge);
+
+            // Lifetime has to cover the distance, or a longer wave would expire part way across the floor
+            // and leave the far end safe again. It is only ever raised, never shortened.
+            float timeToCross = remainingDistance / Mathf.Max(0.01f, speed);
+            remainingLifetime = Mathf.Max(Mathf.Max(0.01f, maxLifetime), timeToCross + 0.25f);
 
             // This prefab uses a centered sprite, not a physical collider that could block the player.
             // A uniform scale preserves authored proportions while keeping the art inside the hitbox.
@@ -75,7 +111,55 @@ namespace TheRedDoor.Boss
             visualScale *= Mathf.Max(0.1f, visualScaleMultiplier);
             transform.localScale = new Vector3(visualScale, visualScale, 1f);
             spriteRenderer.flipX = direction.x < 0f;
+
+            visual = spriteRenderer;
+            settledScale = transform.localScale;
+            settledColor = spriteRenderer.color;
+            totalDistance = remainingDistance;
+            age = 0f;
             running = true;
+            ApplyAnimation(); // Show the spawn burst on the first frame rather than the settled shape.
+        }
+
+        private void Update()
+        {
+            if (!running)
+                return;
+
+            age += Time.deltaTime;
+            ApplyAnimation();
+        }
+
+        // Scale, rotation and colour only. The hitbox is an axis-aligned box of the configured size at the
+        // root position, so a bigger or leaning drawing never reaches further than the damage it warns about.
+        private void ApplyAnimation()
+        {
+            if (visual == null)
+                return;
+
+            float travelled = totalDistance > 0f
+                ? Mathf.Clamp01(1f - remainingDistance / totalDistance)
+                : 1f;
+            float spawn = spawnDuration > 0f ? Mathf.Clamp01(age / spawnDuration) : 1f;
+            float burst = 1f - (1f - spawn) * (1f - spawn); // Ease out, so the burst settles rather than snaps.
+
+            Vector2 spawnMultiplier = Vector2.Lerp(spawnScale, Vector2.one, burst);
+            float pulse = 1f + crestPulse * Mathf.Sin(age * crestPulseFrequency * Mathf.PI * 2f);
+
+            Vector3 scale = settledScale;
+            scale.x *= spawnMultiplier.x * (1f + travelScaleGain.x * travelled);
+            scale.y *= spawnMultiplier.y * (1f + travelScaleGain.y * travelled) * Mathf.Max(0.05f, pulse);
+            transform.localScale = scale;
+
+            float wobble = wobbleAngle * Mathf.Sin(age * wobbleFrequency * Mathf.PI * 2f);
+            transform.rotation = Quaternion.Euler(0f, 0f, -direction.x * (leanAngle + wobble));
+
+            float fade = fadeOutFraction > 0f
+                ? Mathf.Clamp01((1f - travelled) / fadeOutFraction)
+                : 1f;
+            Color color = settledColor;
+            color.a = settledColor.a * Mathf.Min(burst, fade);
+            visual.color = color;
         }
 
         private void FixedUpdate()
