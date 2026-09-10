@@ -189,8 +189,76 @@ public static class PresentationPass
     static double testStart;
     static int testStep;
     static float leftStart, rightStart;
+    static BossHealth damageBarTestBoss;
+    static Image damageBarTestCurrent, damageBarTestMemory;
+    static double damageBarTestStart;
     static void Invoke(object obj, string name, params object[] args) => obj.GetType()
         .GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(obj, args);
+
+    [MenuItem("Tools/TheRedDoor/Verify Boss Damage Bar")]
+    static void VerifyBossDamageBar()
+    {
+        if (!EditorApplication.isPlaying) throw new Exception("Enter Play first.");
+        Debug.ClearDeveloperConsole();
+        var boss = UnityEngine.Object.FindAnyObjectByType<BossHealth>();
+        var hud = UnityEngine.Object.FindAnyObjectByType<BossHealthUI>();
+        Check(boss != null && hud != null, "Boss damage-bar dependencies exist");
+
+        boss.ResetHealth();
+        int maximum = boss.MaxHealth;
+        Check(boss.TakeDamage(1), "Boss accepts test damage");
+        var currentFill = Field<Image>(hud, "healthFill");
+        var memoryFill = Field<Image>(hud, "damageFill");
+        float expected = (float)(maximum - 1) / maximum;
+        Check(Mathf.Approximately(currentFill.fillAmount, expected),
+            "Red boss health drops immediately");
+        Check(memoryFill != null && memoryFill.fillAmount > currentFill.fillAmount,
+            "Bright taken-damage segment remains behind");
+        // fillAmount being right is not the same as anything being drawn. A Filled Image with no
+        // sprite reports every value correctly and renders nothing, which is how this passed while
+        // the effect was invisible on screen.
+        Check(memoryFill.sprite != null, "Bright segment has a sprite, so it can actually be drawn");
+        Check(memoryFill.enabled && memoryFill.color.a > 0f && memoryFill.gameObject.activeInHierarchy,
+            "Bright segment is enabled, opaque and active");
+        Check(memoryFill.transform.GetSiblingIndex() < currentFill.transform.GetSiblingIndex(),
+            "Bright segment draws behind the red fill, not over it");
+
+        damageBarTestBoss = boss;
+        damageBarTestCurrent = currentFill;
+        damageBarTestMemory = memoryFill;
+        damageBarTestStart = EditorApplication.timeSinceStartup;
+        EditorApplication.update -= TickBossDamageBar;
+        EditorApplication.update += TickBossDamageBar;
+    }
+
+    static void TickBossDamageBar()
+    {
+        if (!EditorApplication.isPlaying || damageBarTestBoss == null)
+        {
+            EditorApplication.update -= TickBossDamageBar;
+            return;
+        }
+        if (EditorApplication.timeSinceStartup - damageBarTestStart < 0.9)
+            return;
+
+        try
+        {
+            Check(Mathf.Approximately(damageBarTestMemory.fillAmount, damageBarTestCurrent.fillAmount),
+                "Taken-damage segment drains back to current health");
+            damageBarTestBoss.ResetHealth();
+            Check(Mathf.Approximately(damageBarTestCurrent.fillAmount, 1f) &&
+                Mathf.Approximately(damageBarTestMemory.fillAmount, 1f), "Both layers reset to full health");
+            Debug.Log("BOSS DAMAGE BAR CHECKS COMPLETE.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogException(ex);
+        }
+        finally
+        {
+            EditorApplication.update -= TickBossDamageBar;
+        }
+    }
 
     [MenuItem("Tools/TheRedDoor/Run Play Presentation Checks")]
     static void Test()
@@ -241,7 +309,10 @@ public static class PresentationPass
             {
                 var bossHud = UnityEngine.Object.FindAnyObjectByType<BossHealthUI>();
                 var fill = Field<Image>(bossHud, "healthFill");
-                Check(fill.fillAmount < 1f && fill.fillAmount >= 0.79f, "Animated boss health drain");
+                var damageFill = Field<Image>(bossHud, "damageFill");
+                Check(Mathf.Approximately(fill.fillAmount, 0.95f), "Boss health drops immediately");
+                Check(damageFill != null && damageFill.fillAmount > fill.fillAmount,
+                    "Taken-damage segment holds behind current health");
                 var playerHud = UnityEngine.Object.FindAnyObjectByType<PlayerHealthUI>();
                 Check(Field<int>(playerHud, "previousHealth") == testPlayer.CurrentHealth, "Player HUD tracks damage");
                 Check(Field<float>(playerHud, "hitPulse") > 0f, "Player damage pulse active");
