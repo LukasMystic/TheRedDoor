@@ -1,3 +1,4 @@
+using TheRedDoor.Controls;
 using TheRedDoor.World;
 using TMPro;
 using UnityEngine;
@@ -17,10 +18,13 @@ namespace TheRedDoor.UI
 
         [Header("Presentation")]
         [SerializeField] private string promptMessage = "Press E to Open";
+        [Tooltip("Used while a controller is in the player's hands. {interact} is filled in from the pad.")]
+        [SerializeField] private string gamepadPromptMessage = "Press {interact} to Open";
         [SerializeField, Min(0f)] private float fadeDuration = 0.5f;
         [SerializeField, TextArea] private string endingMessage = "THE RED DOOR\n\nEnd of Demo";
 
         private bool configured;
+        private int hintsVersion = -1;
 
         private void Awake()
         {
@@ -40,7 +44,7 @@ namespace TheRedDoor.UI
             }
 
             configured = true;
-            interactionPrompt.text = promptMessage;
+            RefreshWording();
             endingText.text = endingMessage;
             interactionPrompt.raycastTarget = false;
             endingText.raycastTarget = false;
@@ -55,6 +59,7 @@ namespace TheRedDoor.UI
                 return;
             }
 
+            RefreshWording();
             interactionPrompt.enabled = door.CanInteract;
             endingOverlay.interactable = false;
             endingOverlay.blocksRaycasts = door.HasOpened && !GameFlowUI.OwnsEnding;
@@ -69,6 +74,18 @@ namespace TheRedDoor.UI
             endingOverlay.alpha = fadeDuration <= 0f ? 1f :
                 Mathf.MoveTowards(endingOverlay.alpha, 1f, Time.unscaledDeltaTime / fadeDuration);
             endingText.enabled = endingOverlay.alpha >= 1f;
+        }
+
+        // The door is the one prompt that names a single button, so it has to follow the device the
+        // player is actually holding rather than assuming a keyboard.
+        private void RefreshWording()
+        {
+            if (interactionPrompt == null || hintsVersion == InputDeviceHints.Version)
+                return;
+            hintsVersion = InputDeviceHints.Version;
+            interactionPrompt.text = InputDeviceHints.UsingGamepad
+                ? InputDeviceHints.Format(gamepadPromptMessage)
+                : promptMessage;
         }
 
         private void OnDisable()

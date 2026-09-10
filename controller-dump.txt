@@ -1,0 +1,122 @@
+=== all devices ===
+Keyboard | layout=Keyboard | type=FastKeyboard | iface=OSX | product= | manufacturer=
+Mouse | layout=Mouse | type=FastMouse | iface=OSX | product= | manufacturer=
+Pen | layout=Pen | type=Pen | iface=OSX | product= | manufacturer=
+2.4G XBOX 360 For Windows | layout=HID::2.4G XBOX 360 For Windows | type=Joystick | iface=HID | product=XBOX 360 For Windows | manufacturer=2.4G
+2.4G XBOX 360 For Windows1 | layout=HID::2.4G XBOX 360 For Windows | type=Joystick | iface=HID | product=XBOX 360 For Windows | manufacturer=2.4G
+
+=== controls on 2.4G XBOX 360 For Windows [HID::2.4G XBOX 360 For Windows] ===
+  /2.4G XBOX 360 For Windows/stick | layout=Stick | type=StickControl | usages=[Primary2DMotion] | value=(0.00, 0.00)
+  /2.4G XBOX 360 For Windows/button12 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button13 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button14 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button15 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button9 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button10 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button7 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button8 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button5 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button6 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button11 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button0 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/trigger | layout=Button | type=ButtonControl | usages=[PrimaryTrigger,PrimaryAction] | value=0
+  /2.4G XBOX 360 For Windows/button2 | layout=Button | type=ButtonControl | usages=[SecondaryTrigger,SecondaryAction] | value=0
+  /2.4G XBOX 360 For Windows/button3 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/button4 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/z | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/rz | layout=Axis | type=AxisControl | usages=[Twist] | value=0
+  /2.4G XBOX 360 For Windows/rx | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/ry | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/stick/up | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/stick/x | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/stick/y | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/stick/down | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/stick/left | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows/stick/right | layout=Button | type=ButtonControl | usages=[] | value=0
+
+--- generated layout 'HID::2.4G XBOX 360 For Windows' (parameters decide axis polarity) ---
+  stick | layout=Stick | params=[] | processors=[stickDeadzone] | default= | usages=[Primary2DMotion]
+  stick/x | layout= | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]
+  stick/y | layout= | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]
+  stick/up | layout= | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=-1,clampMax=0,invert=true] | processors=[] | default= | usages=[]
+  stick/down | layout= | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=0,clampMax=1,invert=false] | processors=[] | default= | usages=[]
+  stick/left | layout= | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=-1,clampMax=0,invert=true] | processors=[] | default= | usages=[]
+  stick/right | layout= | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=0,clampMax=1] | processors=[] | default= | usages=[]
+  button12 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button13 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button14 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button15 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button9 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button10 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button7 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button8 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button5 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button6 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button11 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button0 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  trigger | layout=Button | params=[] | processors=[] | default= | usages=[PrimaryTrigger,PrimaryAction]
+  button2 | layout=Button | params=[] | processors=[] | default= | usages=[SecondaryTrigger,SecondaryAction]
+  button3 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button4 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  z | layout=Axis | params=[normalize=true,normalizeMin=0,normalizeMax=1,normalizeZero=0.5] | processors=[axisDeadzone] | default=127 | usages=[]
+  rz | layout=Axis | params=[normalize=true,normalizeMin=0,normalizeMax=1,normalizeZero=0.5] | processors=[axisDeadzone] | default=127 | usages=[Twist]
+  rx | layout=Axis | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]
+  ry | layout=Axis | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]
+
+=== controls on 2.4G XBOX 360 For Windows1 [HID::2.4G XBOX 360 For Windows] ===
+  /2.4G XBOX 360 For Windows1/stick | layout=Stick | type=StickControl | usages=[Primary2DMotion] | value=(0.00, 0.00)
+  /2.4G XBOX 360 For Windows1/button12 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button13 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button14 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button15 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button9 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button10 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button7 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button8 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button5 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button6 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button11 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button0 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/trigger | layout=Button | type=ButtonControl | usages=[PrimaryTrigger,PrimaryAction] | value=0
+  /2.4G XBOX 360 For Windows1/button2 | layout=Button | type=ButtonControl | usages=[SecondaryTrigger,SecondaryAction] | value=0
+  /2.4G XBOX 360 For Windows1/button3 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/button4 | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/z | layout=Axis | type=AxisControl | usages=[] | value=-1
+  /2.4G XBOX 360 For Windows1/rz | layout=Axis | type=AxisControl | usages=[Twist] | value=-1
+  /2.4G XBOX 360 For Windows1/rx | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/ry | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/stick/up | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/stick/x | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/stick/y | layout=Axis | type=AxisControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/stick/down | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/stick/left | layout=Button | type=ButtonControl | usages=[] | value=0
+  /2.4G XBOX 360 For Windows1/stick/right | layout=Button | type=ButtonControl | usages=[] | value=0
+
+--- generated layout 'HID::2.4G XBOX 360 For Windows' (parameters decide axis polarity) ---
+  stick | layout=Stick | params=[] | processors=[stickDeadzone] | default= | usages=[Primary2DMotion]
+  stick/x | layout= | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]
+  stick/y | layout= | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]
+  stick/up | layout= | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=-1,clampMax=0,invert=true] | processors=[] | default= | usages=[]
+  stick/down | layout= | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=0,clampMax=1,invert=false] | processors=[] | default= | usages=[]
+  stick/left | layout= | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=-1,clampMax=0,invert=true] | processors=[] | default= | usages=[]
+  stick/right | layout= | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp=2,clampMin=0,clampMax=1] | processors=[] | default= | usages=[]
+  button12 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button13 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button14 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button15 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button9 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button10 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button7 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button8 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button5 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button6 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button11 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button0 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  trigger | layout=Button | params=[] | processors=[] | default= | usages=[PrimaryTrigger,PrimaryAction]
+  button2 | layout=Button | params=[] | processors=[] | default= | usages=[SecondaryTrigger,SecondaryAction]
+  button3 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  button4 | layout=Button | params=[] | processors=[] | default= | usages=[]
+  z | layout=Axis | params=[normalize=true,normalizeMin=0,normalizeMax=1,normalizeZero=0.5] | processors=[axisDeadzone] | default=127 | usages=[]
+  rz | layout=Axis | params=[normalize=true,normalizeMin=0,normalizeMax=1,normalizeZero=0.5] | processors=[axisDeadzone] | default=127 | usages=[Twist]
+  rx | layout=Axis | params=[normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]
+  ry | layout=Axis | params=[invert=true,normalize=true,normalizeMin=-1,normalizeMax=1,normalizeZero=0] | processors=[axisDeadzone] | default= | usages=[]

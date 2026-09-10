@@ -1,9 +1,13 @@
+using System;
 using TheRedDoor.Player;
 using TheRedDoor.World;
 using TMPro;
 using UnityEngine;
+using TheRedDoor.Controls;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -75,6 +79,16 @@ namespace TheRedDoor.UI
         private AudioSource uiSource, titleMusic;
         private AudioClip hoverClip, clickClip, backClip;
         private bool endShown;
+        [Header("Controller")]
+        [Tooltip("Unity has no layout for controllers that arrive as a generic HID joystick, so it " +
+            "guesses which way the Y axis points. Its own source calls this a guess. This Mac's " +
+            "2.4G XBOX 360 receiver is one it guesses wrong, which is why the menu scrolled " +
+            "backwards. Turn this off if a different controller ends up inverted instead.")]
+        [SerializeField] private bool invertJoystickMenuVertical = true;
+
+        private float nextMenuRepeatTime;
+        private bool menuRepeating;
+        private int lastSubmitFrame = -1;
         private Canvas[] gameCanvases;
         private bool[] canvasWasEnabled;
         private TMP_FontAsset headingFont, bodyFont;
@@ -102,11 +116,26 @@ namespace TheRedDoor.UI
             for (int i = 0; i < gameCanvases.Length; i++) canvasWasEnabled[i] = gameCanvases[i].enabled;
             headingFont = Resources.Load<TMP_FontAsset>("Fonts & Materials/Oswald Bold SDF");
             bodyFont = Resources.Load<TMP_FontAsset>("Fonts & Materials/Roboto-Bold SDF");
-            if (EventSystem.current == null)
+            EventSystem menuEvents = EventSystem.current;
+            if (menuEvents == null)
             {
                 var events = new GameObject("Menu Event System", typeof(EventSystem),
-                    typeof(UnityEngine.InputSystem.UI.InputSystemUIInputModule));
+                    typeof(InputSystemUIInputModule));
                 events.transform.SetParent(transform, false);
+                menuEvents = events.GetComponent<EventSystem>();
+            }
+
+            // The scene originally pointed at Input System's package-default UI actions. Use the
+            // same project asset as gameplay so the generic-HID fallbacks (including this pad's
+            // button numbering and hatswitch) also drive every menu page.
+            var input = player.GetComponent<PlayerInput>();
+            var uiModule = menuEvents != null ? menuEvents.GetComponent<InputSystemUIInputModule>() : null;
+            if (uiModule == null && menuEvents != null)
+                uiModule = menuEvents.gameObject.AddComponent<InputSystemUIInputModule>();
+            if (uiModule != null && input != null && input.actions != null)
+            {
+                RouteGenericJoystickMenusThroughFallback(input.actions);
+                uiModule.actionsAsset = input.actions;
             }
 
             hoverClip = Resources.Load<AudioClip>("Audio/SFX/UI_Hover");
@@ -157,6 +186,13 @@ namespace TheRedDoor.UI
                 return;
             }
 
+            if (current == Page.Pause && BackPressed())
+            {
+                PlayClip(backClip);
+                Show(Page.None);
+                return;
+            }
+
             bool blocked = current == Page.Title ||
                 current == Page.End || current == Page.Credits ||
                 (playerHealth != null && playerHealth.IsDead) ||
@@ -173,19 +209,30 @@ namespace TheRedDoor.UI
 
                 // Moving the mouse drops keyboard focus, so a lit row always means the pointer is
                 // there or you just navigated, never that something was selected a minute ago.
-                if (hasSelection && Mouse.current != null &&
+                // Skipped while a pad is in use: a nudged desk must not steal a controller's row.
+                if (hasSelection && !InputDeviceHints.UsingGamepad && Mouse.current != null &&
                     Mouse.current.delta.ReadValue().sqrMagnitude > 4f)
                 {
                     EventSystem.current.SetSelectedGameObject(null);
                 }
-                else if (!hasSelection && NavigationPressed())
+                else if (!hasSelection && SubmitPressed())
                 {
-                    // Nothing is pre-selected, so the first arrow press is what hands focus over.
-                    var panel = VisiblePanel();
-                    var first = panel != null ? panel.GetComponentInChildren<Button>() : null;
-                    if (first != null)
-                        EventSystem.current.SetSelectedGameObject(first.gameObject);
+                    // A page opens with no highlighted row for mouse users. If the first thing a
+                    // controller player does is press A/Cross, select and activate the first row in
+                    // that same press rather than swallowing it merely to establish focus.
+                    SelectFirstRow();
+                    Submit(EventSystem.current.currentSelectedGameObject);
                 }
+                else if (!hasSelection && (NavigationPressed() || InputDeviceHints.UsingGamepad))
+                {
+                    // On a keyboard nothing is pre-selected and the first arrow press hands focus
+                    // over. A pad has no pointer to fall back on, so it keeps a row lit at all
+                    // times; without one there is nothing for Submit to press and the menu looks
+                    // dead.
+                    SelectFirstRow();
+                }
+
+                DriveJoystickMenu();
             }
 
             if (!endShown && door != null && door.HasOpened && current == Page.None)
@@ -203,8 +250,12 @@ namespace TheRedDoor.UI
             var keys = Keyboard.current;
             if (keys != null && keys.escapeKey.wasPressedThisFrame)
                 return true;
-            var pad = Gamepad.current;
-            return pad != null && pad.startButton.wasPressedThisFrame;
+            var pads = Gamepad.all;
+            for (int i = 0; i < pads.Count; i++)
+                if (pads[i].startButton.wasPressedThisFrame)
+                    return true;
+            // Start, plus Back, so there is a second way in if a controller reports them swapped.
+            return JoystickButtonPressed(JoystickStart) || JoystickButtonPressed(JoystickBack);
         }
 
         private static bool BackPressed()
@@ -212,9 +263,44 @@ namespace TheRedDoor.UI
             var keys = Keyboard.current;
             if (keys != null && keys.escapeKey.wasPressedThisFrame)
                 return true;
-            var pad = Gamepad.current;
-            return pad != null &&
-                (pad.buttonEast.wasPressedThisFrame || pad.startButton.wasPressedThisFrame);
+            // Every connected pad, not just Gamepad.current: before a player has touched anything,
+            // current is still null and they would have no way back out of the credits.
+            var pads = Gamepad.all;
+            for (int i = 0; i < pads.Count; i++)
+                if (pads[i].buttonEast.wasPressedThisFrame || pads[i].startButton.wasPressedThisFrame)
+                    return true;
+            return JoystickButtonPressed("button2") || JoystickButtonPressed(JoystickStart) ||
+                JoystickButtonPressed(JoystickBack);
+        }
+
+        // Some otherwise normal USB/Bluetooth controllers arrive through macOS as Joystick
+        // instead of Gamepad. Their conventional HID order is A/B/X/Y, shoulders, Back/Start.
+        // Controls are looked up defensively because the base Joystick layout guarantees only
+        // a stick and trigger; missing optional buttons simply return false.
+        private static bool JoystickButtonPressed(string controlName)
+        {
+            var sticks = Joystick.all;
+            for (int i = 0; i < sticks.Count; i++)
+            {
+                ButtonControl button = sticks[i].TryGetChildControl<ButtonControl>(controlName);
+                if (button != null && button.wasPressedThisFrame)
+                    return true;
+            }
+            return false;
+        }
+
+        private static bool SubmitPressed()
+        {
+            var pads = Gamepad.all;
+            for (int i = 0; i < pads.Count; i++)
+                if (pads[i].buttonSouth.wasPressedThisFrame)
+                    return true;
+
+            var sticks = Joystick.all;
+            for (int i = 0; i < sticks.Count; i++)
+                if (sticks[i].trigger != null && sticks[i].trigger.wasPressedThisFrame)
+                    return true;
+            return false;
         }
 
         // Nothing is pre-selected, so some input has to hand focus to the first row. Without the pad
@@ -228,12 +314,198 @@ namespace TheRedDoor.UI
                 keys.tabKey.wasPressedThisFrame))
                 return true;
 
-            var pad = Gamepad.current;
-            if (pad == null)
+            // Naming pad controls one by one only covers the controllers Unity recognises as a
+            // Gamepad, and it misses whichever button the player happens to try first. Asking
+            // whether any pad-shaped device left its resting state covers every stick, trigger and
+            // face button on every brand, including one that only reports as a plain Joystick.
+            return InputDeviceHints.MenuNavigationRequested;
+        }
+
+        // A recognised Gamepad should use Unity's UI module. This receiver, however, is exposed as
+        // a generic HID Joystick whose generated layout has the vertical direction reversed and
+        // whose D-pad is four ordinary buttons rather than a Hatswitch. Disable only the explicit
+        // <Joystick> UI bindings on this runtime copy so DriveJoystickMenu is the single owner of
+        // those inputs; keyboard, mouse and semantic Gamepad bindings remain untouched.
+        private static void RouteGenericJoystickMenusThroughFallback(InputActionAsset actions)
+        {
+            InputActionMap ui = actions != null ? actions.FindActionMap("UI", false) : null;
+            if (ui == null)
+                return;
+
+            foreach (InputAction action in ui.actions)
+            {
+                for (int i = 0; i < action.bindings.Count; i++)
+                {
+                    string path = action.bindings[i].path;
+                    if (!string.IsNullOrEmpty(path) &&
+                        path.StartsWith("<Joystick>", StringComparison.OrdinalIgnoreCase))
+                        action.ApplyBindingOverride(i, string.Empty);
+                }
+            }
+        }
+
+        // A controller that macOS hands over as a plain Joystick rather than a Gamepad cannot reach
+        // the pages through the EventSystem at all: the UI input module's Navigate and Submit
+        // actions resolve to keyboard, mouse and Gamepad controls only, so with a row lit the stick
+        // moves nothing and the A button presses nothing. This walks the rows and fires the
+        // highlighted one directly, and it stands down the moment the module can do the job itself.
+        private void DriveJoystickMenu()
+        {
+            if (!JoystickMenuFallbackNeeded())
+            {
+                menuRepeating = false;
+                return;
+            }
+
+            if (JoystickSubmitPressed() && Submit(EventSystem.current.currentSelectedGameObject))
+                return;
+
+            float vertical = JoystickVertical();
+            if (Mathf.Abs(vertical) < 0.5f)
+            {
+                menuRepeating = false;
+                return;
+            }
+
+            // Unscaled, because every page freezes the game.
+            if (menuRepeating && Time.unscaledTime < nextMenuRepeatTime)
+                return;
+            nextMenuRepeatTime = Time.unscaledTime + (menuRepeating ? MenuRepeatRate : MenuRepeatDelay);
+            menuRepeating = true;
+            // Up on a stick is +Y, and the rows run downwards.
+            MoveSelection(vertical > 0f ? -1 : 1);
+        }
+
+        private const float MenuRepeatDelay = 0.38f;
+        private const float MenuRepeatRate = 0.14f;
+
+        // A generic HID joystick has no semantic button names, only report order. The first eight
+        // are the standard XInput order that Codex established and Stanley confirmed in play
+        // (A, B, X, Y, LB, RB, Back, Start); these continue it. Tools > TheRedDoor >
+        // Record Controller Presses prints the real numbers if a different controller disagrees.
+        private const string JoystickDpadUp = "button12";
+        private const string JoystickDpadDown = "button13";
+        private const string JoystickStart = "button8";
+        private const string JoystickBack = "button7";
+
+        // Only stand in when a joystick is connected and the UI input module has nothing from that
+        // device bound to Navigate. If the module's actions are ever repaired in the Inspector, the
+        // joystick bindings in the UI map take over and this returns false, so the two can never
+        // both move the selection on one press.
+        private static bool JoystickMenuFallbackNeeded()
+        {
+            if (Joystick.all.Count == 0 || EventSystem.current == null)
                 return false;
-            return pad.dpad.up.wasPressedThisFrame || pad.dpad.down.wasPressedThisFrame ||
-                pad.leftStick.up.wasPressedThisFrame || pad.leftStick.down.wasPressedThisFrame ||
-                pad.buttonSouth.wasPressedThisFrame;
+
+            var module = EventSystem.current.currentInputModule as InputSystemUIInputModule;
+            InputAction move = module != null && module.move != null ? module.move.action : null;
+            if (move == null)
+                return true;
+
+            var controls = move.controls;
+            for (int i = 0; i < controls.Count; i++)
+                if (controls[i].device is Joystick)
+                    return false;
+            return true;
+        }
+
+        // Returns +1 for up and -1 for down.
+        //
+        // The D-pad is checked first and deliberately: on a controller Unity does not recognise, the
+        // D-pad comes through as four ordinary buttons, and a button has no polarity to get wrong.
+        // The stick does. Unity's HID fallback cannot know which way a nameless Y axis points, so it
+        // inverts it and hopes -- its own source says as much -- and on this receiver it guesses
+        // wrong. That is why the menu scrolled backwards while walking left and right was fine:
+        // vertical stick is the one axis nothing else in the game reads.
+        private float JoystickVertical()
+        {
+            if (JoystickButtonHeld(JoystickDpadUp))
+                return 1f;
+            if (JoystickButtonHeld(JoystickDpadDown))
+                return -1f;
+
+            float value = 0f;
+            var sticks = Joystick.all;
+            for (int i = 0; i < sticks.Count; i++)
+            {
+                var controls = sticks[i].allControls;
+                for (int c = 0; c < controls.Count; c++)
+                {
+                    if (!(controls[c] is Vector2Control axis))
+                        continue;
+                    float y = axis.ReadValue().y;
+                    if (Mathf.Abs(y) > Mathf.Abs(value))
+                        value = y;
+                }
+            }
+            return invertJoystickMenuVertical ? -value : value;
+        }
+
+        // Held, not pressed: navigation repeats while a direction is kept down.
+        private static bool JoystickButtonHeld(string controlName)
+        {
+            var sticks = Joystick.all;
+            for (int i = 0; i < sticks.Count; i++)
+            {
+                ButtonControl button = sticks[i].TryGetChildControl<ButtonControl>(controlName);
+                if (button != null && button.isPressed)
+                    return true;
+            }
+            return false;
+        }
+
+        // The joystick half of SubmitPressed. Kept separate because a real Gamepad's A button is
+        // already handled by the input module, and pressing it twice would fire the row twice.
+        private static bool JoystickSubmitPressed()
+        {
+            var sticks = Joystick.all;
+            for (int i = 0; i < sticks.Count; i++)
+                if (sticks[i].trigger != null && sticks[i].trigger.wasPressedThisFrame)
+                    return true;
+            return false;
+        }
+
+        private void MoveSelection(int delta)
+        {
+            var panel = VisiblePanel();
+            if (panel == null)
+                return;
+            var rows = panel.GetComponentsInChildren<Button>();
+            if (rows.Length == 0)
+                return;
+
+            GameObject selected = EventSystem.current.currentSelectedGameObject;
+            int index = -1;
+            for (int i = 0; i < rows.Length; i++)
+                if (rows[i].gameObject == selected)
+                    index = i;
+
+            // Wraps, which is what a controller player expects from a short vertical list.
+            index = index < 0 ? 0 : (index + delta + rows.Length) % rows.Length;
+            EventSystem.current.SetSelectedGameObject(rows[index].gameObject);
+            PlayHover();
+        }
+
+        // One gate for every code path that activates a row, so a button held across the branch
+        // that establishes focus and the branch that fires the highlighted row can only count once.
+        private bool Submit(GameObject row)
+        {
+            if (row == null || lastSubmitFrame == Time.frameCount)
+                return false;
+            lastSubmitFrame = Time.frameCount;
+            ExecuteEvents.Execute(row, new BaseEventData(EventSystem.current),
+                ExecuteEvents.submitHandler);
+            return true;
+        }
+
+        private void SelectFirstRow()
+        {
+            if (EventSystem.current == null)
+                return;
+            var panel = VisiblePanel();
+            var first = panel != null ? panel.GetComponentInChildren<Button>() : null;
+            if (first != null)
+                EventSystem.current.SetSelectedGameObject(first.gameObject);
         }
 
         private GameObject VisiblePanel()
@@ -294,6 +566,10 @@ namespace TheRedDoor.UI
             var rows = panel.GetComponentsInChildren<ButtonRowHighlight>(true);
             for (int i = 0; i < rows.Length; i++)
                 rows[i].Clear();
+
+            // A controller player opening a page should already be standing on the first row.
+            if (InputDeviceHints.UsingGamepad)
+                SelectFirstRow();
         }
 
         internal void PlayHover() => PlayClip(hoverClip);
