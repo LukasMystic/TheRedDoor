@@ -933,6 +933,10 @@ MonoBehaviour:
   healthFill: {fileID: 1486680692}
   bossNameLabel: {fileID: 947244755}
   bossName: THE KEEPER
+  damageFill: {fileID: 0}
+  damageColor: {r: 1, g: 0.9, b: 0.58, a: 1}
+  damageHoldDuration: 0.2
+  damageDrainDuration: 0.25
 --- !u!225 &190607879
 CanvasGroup:
   m_ObjectHideFlags: 0
