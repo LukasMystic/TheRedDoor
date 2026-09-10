@@ -1,0 +1,780 @@
+fileFormatVersion: 2
+guid: c173df569ac4640d99c4924834708c62
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -448975650933547325
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_0
+  - first:
+      213: 3203072655680493634
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_1
+  - first:
+      213: 1707061988154117402
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_2
+  - first:
+      213: 5729425154626462822
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_3
+  - first:
+      213: -2727486504171013956
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_4
+  - first:
+      213: 6548814115429961379
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_5
+  - first:
+      213: -4875810904172895408
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_6
+  - first:
+      213: -9064301017490274906
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_7
+  - first:
+      213: 9030720119269250952
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_8
+  - first:
+      213: -8277209277663970838
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_9
+  - first:
+      213: 7285911498938815432
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_10
+  - first:
+      213: -8242761160895443552
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_11
+  - first:
+      213: -8538800846723410974
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_12
+  - first:
+      213: -119162788055377564
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_13
+  - first:
+      213: -4047740004050994823
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_14
+  - first:
+      213: -4809810080009549720
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_15
+  - first:
+      213: -3421947449905037922
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_16
+  - first:
+      213: -4945298087764236747
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_17
+  - first:
+      213: 7032692167083763260
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_18
+  - first:
+      213: -1624910290957576366
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_19
+  - first:
+      213: 9149582475763206262
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_20
+  - first:
+      213: -6239290467881497445
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_21
+  - first:
+      213: 786321718006019002
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_22
+  - first:
+      213: -53420581324420525
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_23
+  - first:
+      213: -5833249427844069080
+    second: Moss Guardian_Walk_0_export_Image Frames Animation_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_0
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 1043
+        width: 176
+        height: 154
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ce5e45360be4c9f0800000000000000
+      internalID: -448975650933547325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_1
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 1044
+        width: 164
+        height: 150
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2485a971c99937c20800000000000000
+      internalID: 3203072655680493634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_2
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 1043
+        width: 148
+        height: 151
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1d8f7575d3b0b710800000000000000
+      internalID: 1707061988154117402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_3
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 1041
+        width: 122
+        height: 155
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 664a2b482d1038f40800000000000000
+      internalID: 5729425154626462822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_4
+      rect:
+        serializedVersion: 2
+        x: 1126
+        y: 1039
+        width: 101
+        height: 160
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb8f63da975062ad0800000000000000
+      internalID: -2727486504171013956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_5
+      rect:
+        serializedVersion: 2
+        x: 115
+        y: 782
+        width: 80
+        height: 168
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ae444aadbf02ea50800000000000000
+      internalID: 6548814115429961379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_6
+      rect:
+        serializedVersion: 2
+        x: 371
+        y: 782
+        width: 74
+        height: 171
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0536cc8d0d3a55cb0800000000000000
+      internalID: -4875810904172895408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_7
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 782
+        width: 71
+        height: 171
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a5c743df32253280800000000000000
+      internalID: -9064301017490274906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_8
+      rect:
+        serializedVersion: 2
+        x: 880
+        y: 782
+        width: 78
+        height: 168
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88754070a10935d70800000000000000
+      internalID: 9030720119269250952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_9
+      rect:
+        serializedVersion: 2
+        x: 1122
+        y: 781
+        width: 96
+        height: 164
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae975493402712d80800000000000000
+      internalID: -8277209277663970838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_10
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 524
+        width: 115
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c39e27e7e1cc1560800000000000000
+      internalID: 7285911498938815432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_11
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 524
+        width: 125
+        height: 155
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0adc07c6564db9d80800000000000000
+      internalID: -8242761160895443552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_12
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 526
+        width: 129
+        height: 148
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e31f33ded5108980800000000000000
+      internalID: -8538800846723410974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_13
+      rect:
+        serializedVersion: 2
+        x: 846
+        y: 527
+        width: 128
+        height: 145
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 469938b5316a85ef0800000000000000
+      internalID: -119162788055377564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_14
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 530
+        width: 128
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 979f66389e983d7c0800000000000000
+      internalID: -4047740004050994823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_15
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 276
+        width: 127
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86800f7373f104db0800000000000000
+      internalID: -4809810080009549720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_16
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 275
+        width: 117
+        height: 151
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9d3b50bcecc280d0800000000000000
+      internalID: -3421947449905037922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_17
+      rect:
+        serializedVersion: 2
+        x: 606
+        y: 274
+        width: 94
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 536e46a2795ce5bb0800000000000000
+      internalID: -4945298087764236747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_18
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 274
+        width: 70
+        height: 162
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3623b1e344299160800000000000000
+      internalID: 7032692167083763260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_19
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 276
+        width: 72
+        height: 165
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 257d89313b82379e0800000000000000
+      internalID: -1624910290957576366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_20
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 19
+        width: 75
+        height: 168
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 678410ff8c8d9fe70800000000000000
+      internalID: 9149582475763206262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_21
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 19
+        width: 83
+        height: 166
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9c417b60669969a0800000000000000
+      internalID: -6239290467881497445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_22
+      rect:
+        serializedVersion: 2
+        x: 605
+        y: 19
+        width: 105
+        height: 164
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab37ce8bf6399ea00800000000000000
+      internalID: 786321718006019002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_23
+      rect:
+        serializedVersion: 2
+        x: 837
+        y: 16
+        width: 142
+        height: 162
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35a867aa346324ff0800000000000000
+      internalID: -53420581324420525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Moss Guardian_Walk_0_export_Image Frames Animation_24
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 17
+        width: 162
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8298a1f1d822c0fa0800000000000000
+      internalID: -5833249427844069080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Moss Guardian_Walk_0_export_Image Frames Animation_0: -448975650933547325
+      Moss Guardian_Walk_0_export_Image Frames Animation_1: 3203072655680493634
+      Moss Guardian_Walk_0_export_Image Frames Animation_10: 7285911498938815432
+      Moss Guardian_Walk_0_export_Image Frames Animation_11: -8242761160895443552
+      Moss Guardian_Walk_0_export_Image Frames Animation_12: -8538800846723410974
+      Moss Guardian_Walk_0_export_Image Frames Animation_13: -119162788055377564
+      Moss Guardian_Walk_0_export_Image Frames Animation_14: -4047740004050994823
+      Moss Guardian_Walk_0_export_Image Frames Animation_15: -4809810080009549720
+      Moss Guardian_Walk_0_export_Image Frames Animation_16: -3421947449905037922
+      Moss Guardian_Walk_0_export_Image Frames Animation_17: -4945298087764236747
+      Moss Guardian_Walk_0_export_Image Frames Animation_18: 7032692167083763260
+      Moss Guardian_Walk_0_export_Image Frames Animation_19: -1624910290957576366
+      Moss Guardian_Walk_0_export_Image Frames Animation_2: 1707061988154117402
+      Moss Guardian_Walk_0_export_Image Frames Animation_20: 9149582475763206262
+      Moss Guardian_Walk_0_export_Image Frames Animation_21: -6239290467881497445
+      Moss Guardian_Walk_0_export_Image Frames Animation_22: 786321718006019002
+      Moss Guardian_Walk_0_export_Image Frames Animation_23: -53420581324420525
+      Moss Guardian_Walk_0_export_Image Frames Animation_24: -5833249427844069080
+      Moss Guardian_Walk_0_export_Image Frames Animation_3: 5729425154626462822
+      Moss Guardian_Walk_0_export_Image Frames Animation_4: -2727486504171013956
+      Moss Guardian_Walk_0_export_Image Frames Animation_5: 6548814115429961379
+      Moss Guardian_Walk_0_export_Image Frames Animation_6: -4875810904172895408
+      Moss Guardian_Walk_0_export_Image Frames Animation_7: -9064301017490274906
+      Moss Guardian_Walk_0_export_Image Frames Animation_8: 9030720119269250952
+      Moss Guardian_Walk_0_export_Image Frames Animation_9: -8277209277663970838
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
