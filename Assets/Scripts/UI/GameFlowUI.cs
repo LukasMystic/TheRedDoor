@@ -753,7 +753,9 @@ namespace TheRedDoor.UI
             MakeText(t, "Something old keeps the way. It has kept it a long time.", Margin, TagY, 1100f, 29f, Muted, false);
             MakeButton(t, "BEGIN", 0, true, Begin);
             MakeButton(t, "CREDITS", 1, true, OpenCredits);
+#if !UNITY_WEBGL
             MakeButton(t, "QUIT TO DESKTOP", 2, true, Quit);
+#endif
             var tag = MakeText(t, "DEMO BUILD", 0f, FootY, 1920f - Margin, 20f,
                 new Color(Accent.r, Accent.g, Accent.b, 0.75f), false, 6f);
             tag.alignment = TextAlignmentOptions.TopRight;
@@ -811,7 +813,9 @@ namespace TheRedDoor.UI
             MakeRule(t, RuleY);
             MakeButton(t, "RESUME", 0, false, Resume);
             MakeButton(t, "MAIN MENU", 1, false, MainMenu);
+#if !UNITY_WEBGL
             MakeButton(t, "QUIT TO DESKTOP", 2, false, Quit);
+#endif
         }
 
         private void BuildEnd()
@@ -826,7 +830,9 @@ namespace TheRedDoor.UI
             MakeButton(t, "KEEP LOOKING AROUND", 0, true, KeepExploring, 636f, 84f);
             MakeButton(t, "CREDITS", 1, true, OpenCredits, 636f, 84f);
             MakeButton(t, "MAIN MENU", 2, true, MainMenu, 636f, 84f);
+#if !UNITY_WEBGL
             MakeButton(t, "QUIT TO DESKTOP", 3, true, Quit, 636f, 84f);
+#endif
             var tag = MakeText(t, "THANKS FOR PLAYING", 0f, FootY, 1920f - Margin, 20f,
                 new Color(Accent.r, Accent.g, Accent.b, 0.8f), false, 6f);
             tag.alignment = TextAlignmentOptions.TopRight;
@@ -882,6 +888,9 @@ namespace TheRedDoor.UI
             Show(creditsReturn);
         }
 
+#if !UNITY_WEBGL
+        // No desktop to quit to in a browser tab, so this and its three rows are compiled out
+        // for the web build.
         private void Quit()
         {
             PlayClip(backClip);
@@ -892,6 +901,7 @@ namespace TheRedDoor.UI
             Application.Quit();
 #endif
         }
+#endif
 
         private void OnDestroy()
         {
