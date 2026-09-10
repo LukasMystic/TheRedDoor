@@ -151,8 +151,7 @@ namespace TheRedDoor.UI
             }
             // Esc pauses and unpauses. Not while the title or the end card owns the screen,
             // and not while the player is dead or the scene is reloading around us.
-            if (current == Page.Credits && Keyboard.current != null &&
-                Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (current == Page.Credits && BackPressed())
             {
                 CreditsBack();
                 return;
@@ -162,7 +161,7 @@ namespace TheRedDoor.UI
                 current == Page.End || current == Page.Credits ||
                 (playerHealth != null && playerHealth.IsDead) ||
                 (respawn != null && respawn.IsRestarting);
-            if (!blocked && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (!blocked && PausePressed())
             {
                 PlayClip(current == Page.Pause ? backClip : clickClip);
                 Show(current == Page.Pause ? Page.None : Page.Pause);
@@ -196,14 +195,45 @@ namespace TheRedDoor.UI
             }
         }
 
+        // Esc on a keyboard, Start on a pad. The gameplay actions come from the Input Actions asset,
+        // which already binds a gamepad, but these three menu inputs are read from devices directly,
+        // so each one has to name the pad explicitly or a controller player cannot leave the fight.
+        private static bool PausePressed()
+        {
+            var keys = Keyboard.current;
+            if (keys != null && keys.escapeKey.wasPressedThisFrame)
+                return true;
+            var pad = Gamepad.current;
+            return pad != null && pad.startButton.wasPressedThisFrame;
+        }
+
+        private static bool BackPressed()
+        {
+            var keys = Keyboard.current;
+            if (keys != null && keys.escapeKey.wasPressedThisFrame)
+                return true;
+            var pad = Gamepad.current;
+            return pad != null &&
+                (pad.buttonEast.wasPressedThisFrame || pad.startButton.wasPressedThisFrame);
+        }
+
+        // Nothing is pre-selected, so some input has to hand focus to the first row. Without the pad
+        // cases a controller could move the EventSystem's navigation but never had anything selected
+        // to move from, which reads as the menus simply not responding.
         private static bool NavigationPressed()
         {
             var keys = Keyboard.current;
-            if (keys == null)
-                return false;
-            return keys.upArrowKey.wasPressedThisFrame || keys.downArrowKey.wasPressedThisFrame ||
+            if (keys != null && (keys.upArrowKey.wasPressedThisFrame || keys.downArrowKey.wasPressedThisFrame ||
                 keys.wKey.wasPressedThisFrame || keys.sKey.wasPressedThisFrame ||
-                keys.tabKey.wasPressedThisFrame;
+                keys.tabKey.wasPressedThisFrame))
+                return true;
+
+            var pad = Gamepad.current;
+            if (pad == null)
+                return false;
+            return pad.dpad.up.wasPressedThisFrame || pad.dpad.down.wasPressedThisFrame ||
+                pad.leftStick.up.wasPressedThisFrame || pad.leftStick.down.wasPressedThisFrame ||
+                pad.buttonSouth.wasPressedThisFrame;
         }
 
         private GameObject VisiblePanel()
