@@ -20,6 +20,9 @@ namespace TheRedDoor.Boss
 
         [Header("Tuning")]
         [SerializeField, Min(0f)] private float crossFadeDuration = 0.05f;
+        [Tooltip("World units per second the walk cycle was authored for. Playback scales with the Keeper's real speed so his feet keep up with the ground instead of skating.")]
+        [SerializeField, Min(0.1f)] private float walkReferenceSpeed = 8.1f;
+        [SerializeField] private Vector2 walkSpeedRange = new(0.4f, 1.8f);
 
         private KeeperController controller;
         private int idleStateHash;
@@ -33,6 +36,8 @@ namespace TheRedDoor.Boss
         private BoxCollider2D bodyCollider;
         private Vector3 authoredVisualPosition;
         private bool wasGrounded;
+        private float lastRootX;
+        private bool hasLastRootX;
 
         private void Awake()
         {
@@ -60,10 +65,15 @@ namespace TheRedDoor.Boss
         private void OnEnable()
         {
             currentStateHash = 0;
+            hasLastRootX = false;
+            if (animator != null)
+                animator.speed = 1f;
         }
 
         private void LateUpdate()
         {
+            UpdateWalkPlaybackSpeed();
+
             int desiredStateHash = SelectAnimationState();
             if (desiredStateHash != currentStateHash)
             {
@@ -90,6 +100,28 @@ namespace TheRedDoor.Boss
                 visual.transform.localPosition = authoredVisualPosition;
                 wasGrounded = false;
             }
+        }
+
+        // Measured from the root rather than read off the controller, so it stays right whatever moves him:
+        // charge, heavy advance, or anything added later.
+        private void UpdateWalkPlaybackSpeed()
+        {
+            float x = transform.position.x;
+            float speed = 0f;
+            if (hasLastRootX && Time.deltaTime > 0f)
+                speed = Mathf.Abs(x - lastRootX) / Time.deltaTime;
+            lastRootX = x;
+            hasLastRootX = true;
+
+            KeeperController.State state = controller.CurrentState;
+            bool walking = state == KeeperController.State.Charge ||
+                state == KeeperController.State.HeavyAdvance;
+
+            animator.speed = walking
+                ? Mathf.Clamp(speed / Mathf.Max(0.1f, walkReferenceSpeed),
+                    Mathf.Min(walkSpeedRange.x, walkSpeedRange.y),
+                    Mathf.Max(walkSpeedRange.x, walkSpeedRange.y))
+                : 1f;
         }
 
         private int SelectAnimationState()

@@ -22,7 +22,21 @@ decodes short mono sound effects on load. Selected effects are pitched/mixed at 
 Exploration and battle tracks repeat with AudioSource looping; only Forest Ambience
 is explicitly advertised by its creator as a seamless loop.
 
-## Tuning
+## Processed demo and menu audio
+
+The original downloads above remain in `Assets/Audio`. The game now prefers the
+processed OGG set in `Assets/Resources/Audio`; these files include level matching,
+loop preparation and layered effects. The outro is derived from the exploration
+recording. The current Keeper voice and `Music_Boss` are synthesized replacements,
+not the original Medieval: Battle recording.
+
+The opening `Music_Title` and `UI_Hover`, `UI_Click`, `UI_Back` were synthesized for
+this project (a sparse minor-key theme and short wooden UI ticks). They do not use
+an additional downloaded recording. `GameFlowUI` loads these automatically;
+the opening theme replaces gameplay music on the title page, and pause ducks the
+current gameplay beds. Menu effects continue at zero time scale.
+
+## Mix controls
 
 Select the scene `GameAudio` object, then **Demo Audio → Mix**. Master, Music,
 Ambience and SFX can be tuned independently (0 mutes). No audio singleton survives

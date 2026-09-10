@@ -19,6 +19,15 @@ namespace TheRedDoor.UI
         [Tooltip("Assign before Play: empty first, progressively fuller bulbs, full last. At least three sprites.")]
         [SerializeField] private Sprite[] healthStages = new Sprite[8];
 
+        [Header("Liquid")]
+        [Tooltip("How hard the contents slosh when health changes. 0 keeps the old still potion.")]
+        [SerializeField, Range(0f, 1f)] private float sloshStrength = 0.5f;
+        [Tooltip("Slosh oscillations per second, and how fast they settle.")]
+        [SerializeField, Min(0.1f)] private float sloshFrequency = 4.6f;
+        [SerializeField, Min(0.1f)] private float sloshDamping = 3.2f;
+        [Tooltip("Constant idle drift, so the liquid is never completely still.")]
+        [SerializeField, Range(0f, 1f)] private float idleSway = 0.35f;
+
         private PlayerHealth subscribedHealth;
         private bool initialized;
         private int previousHealth = -1;
@@ -26,6 +35,11 @@ namespace TheRedDoor.UI
         private float hitPulse;
         private Vector3 imageScale;
         private Color imageColor;
+        private Quaternion imageRotation;
+        private Vector2 imagePosition;
+        private float slosh;          // displacement
+        private float sloshVelocity;  // and its rate: a plain damped spring
+        private Material liquidMaterial, originalMaterial;
 
         private void Start()
         {
@@ -63,6 +77,15 @@ namespace TheRedDoor.UI
 
             imageScale = healthImage.rectTransform.localScale;
             imageColor = healthImage.color;
+            imageRotation = healthImage.rectTransform.localRotation;
+            imagePosition = healthImage.rectTransform.anchoredPosition;
+            originalMaterial = healthImage.material;
+            Shader liquidShader = Resources.Load<Shader>("HealthPotion");
+            if (liquidShader != null)
+            {
+                liquidMaterial = new Material(liquidShader) { name = "Health liquid (runtime)" };
+                healthImage.material = liquidMaterial;
+            }
             initialized = true;
             ConnectHealth();
         }
@@ -81,7 +104,11 @@ namespace TheRedDoor.UI
             if (initialized && healthImage != null)
             {
                 healthImage.rectTransform.localScale = imageScale;
+                healthImage.rectTransform.localRotation = imageRotation;
+                healthImage.rectTransform.anchoredPosition = imagePosition;
                 healthImage.color = imageColor;
+                slosh = 0f;
+                sloshVelocity = 0f;
             }
             previousHealth = -1;
             hitPulse = 0f;
@@ -105,7 +132,11 @@ namespace TheRedDoor.UI
             int maximum = Mathf.Max(1, maxHealth);
             int current = Mathf.Clamp(currentHealth, 0, maximum);
             if (previousHealth >= 0 && current != previousHealth)
+            {
                 hitPulse = 1f;
+                // Losing health kicks the liquid harder than gaining it, and downward.
+                sloshVelocity += current < previousHealth ? -9f : 5f;
+            }
             previousHealth = current;
             maximumHealth = maximum;
             int lastStage = healthStages.Length - 1;
@@ -123,7 +154,16 @@ namespace TheRedDoor.UI
             }
 
             if (healthImage != null)
+            {
                 healthImage.sprite = healthStages[stageIndex];
+                if (liquidMaterial != null)
+                {
+                    Sprite sprite = healthImage.sprite;
+                    Rect uv = sprite.textureRect;
+                    liquidMaterial.SetVector("_UVRect", new Vector4(uv.x / sprite.texture.width,
+                        uv.y / sprite.texture.height, uv.width / sprite.texture.width, uv.height / sprite.texture.height));
+                }
+            }
             if (healthLabel != null)
                 healthLabel.text = $"{current} / {maximum}";
         }
@@ -132,12 +172,57 @@ namespace TheRedDoor.UI
         {
             if (!initialized || healthImage == null)
                 return;
-            hitPulse = Mathf.MoveTowards(hitPulse, 0f, Time.unscaledDeltaTime * 2.5f);
+            float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+            hitPulse = Mathf.MoveTowards(hitPulse, 0f, dt * 2.5f);
             float lowHealthPulse = previousHealth > 0 && previousHealth <= maximumHealth * 0.25f
                 ? (Mathf.Sin(Time.unscaledTime * 6f) + 1f) * 0.025f : 0f;
-            healthImage.rectTransform.localScale = imageScale *
-                (1f + Mathf.Sin(hitPulse * Mathf.PI) * 0.12f + lowHealthPulse);
+
+            // Damped spring: a hit displaces the contents, and they rock back and settle rather
+            // than snapping. This is what sells a potion as a liquid without a shader or new art.
+            float omega = Mathf.Max(0.1f, sloshFrequency) * 2f * Mathf.PI;
+            // Small substeps keep the spring stable even at 20 FPS or during a hitch.
+            int steps = Mathf.Max(1, Mathf.CeilToInt(dt * Mathf.Max(120f, omega * 4f)));
+            float step = dt / steps;
+            for (int i = 0; i < steps; i++)
+            {
+                sloshVelocity += (-omega * omega * slosh - 2f * Mathf.Max(0.1f, sloshDamping) * sloshVelocity) * step;
+                slosh += sloshVelocity * step;
+            }
+            slosh = Mathf.Clamp(slosh, -1.5f, 1.5f);
+
+            // Idle drift on two slightly detuned sines, so it never reads as a loop.
+            float drift = idleSway * (Mathf.Sin(Time.unscaledTime * 1.13f) * 0.6f +
+                Mathf.Sin(Time.unscaledTime * 0.67f + 2.1f) * 0.4f);
+            float tilt = (slosh * 6f + drift * 1.4f) * sloshStrength;
+            float bob = (slosh * 5f + drift * 2.2f) * sloshStrength;
+
+            // Volume-preserving squash: wider as it flattens, so it reads as fluid, not rubber.
+            float squash = 1f + (slosh * 0.10f + drift * 0.02f) * sloshStrength;
+            float pulse = 1f + Mathf.Sin(hitPulse * Mathf.PI) * 0.12f + lowHealthPulse;
+            var rect = healthImage.rectTransform;
+            if (liquidMaterial != null)
+            {
+                liquidMaterial.SetFloat("_LiquidTime", Time.unscaledTime * idleSway);
+                liquidMaterial.SetFloat("_Slosh", slosh);
+                liquidMaterial.SetFloat("_Strength", sloshStrength);
+                rect.localScale = imageScale * pulse;
+                rect.localRotation = imageRotation;
+                rect.anchoredPosition = imagePosition;
+            }
+            else // Graceful fallback if the optional shader cannot be loaded.
+            {
+                rect.localScale = new Vector3(imageScale.x * pulse / squash,
+                    imageScale.y * pulse * squash, imageScale.z);
+                rect.localRotation = imageRotation * Quaternion.Euler(0f, 0f, tilt);
+                rect.anchoredPosition = imagePosition + new Vector2(0f, bob);
+            }
             healthImage.color = Color.Lerp(imageColor, new Color(1f, 0.55f, 0.42f, imageColor.a), hitPulse * 0.6f);
+        }
+
+        private void OnDestroy()
+        {
+            if (healthImage != null) healthImage.material = originalMaterial;
+            if (liquidMaterial != null) Destroy(liquidMaterial);
         }
     }
 }

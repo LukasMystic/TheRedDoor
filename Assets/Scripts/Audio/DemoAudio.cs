@@ -1,5 +1,6 @@
 using TheRedDoor.Boss;
 using TheRedDoor.Player;
+using TheRedDoor.UI;
 using TheRedDoor.World;
 using UnityEngine;
 
@@ -46,6 +47,8 @@ namespace TheRedDoor.Audio
         [SerializeField] private AudioClip gateOpen;
         [SerializeField] private AudioClip doorOpen;
         [SerializeField] private AudioClip victory;
+        [Tooltip("Short tick when the swing recharges, so the cooldown is audible as well as visible.")]
+        [SerializeField] private AudioClip attackReady;
 
         [Header("Processed Clips")]
         [Tooltip("Load the level-matched set from Resources/Audio by name, falling back to whatever is assigned above when a file is missing. Turn off to use only the Inspector assignments.")]
@@ -56,12 +59,16 @@ namespace TheRedDoor.Audio
         [SerializeField, Range(0f, 1f)] private float musicVolume = 0.24f;
         [SerializeField, Range(0f, 1f)] private float ambienceVolume = 0.12f;
         [SerializeField, Range(0f, 1f)] private float sfxVolume = 0.7f;
+        [Tooltip("Multiplies the music beds only. The scene's Music Volume was set against far quieter placeholder tracks, which left the music about 26 dB under the SFX and effectively inaudible during a fight. These are new fields, so they take effect without re-editing the scene.")]
+        [SerializeField, Range(1f, 8f)] private float musicMakeupGain = 3f;
+        [SerializeField, Range(1f, 12f)] private float ambienceMakeupGain = 5f;
 
         private AudioSource explorationSource, battleSource, ambienceSource, outroSource;
         private AudioSource playerSource, bossSource, worldSource, stepSource;
         private Rigidbody2D playerBody;
         private bool initialized, connected, wasGrounded, wasDashing, wasRaised, wasOpened, encounterSeen;
         private KeeperController.State lastState;
+        private bool wasSwingReady, swingUsed;
         private float footstepTimer, airborneTime, explorationBlend, battleBlend, ambienceBlend, outroBlend;
         private int nextFootstep;
 
@@ -120,6 +127,7 @@ namespace TheRedDoor.Audio
             gateOpen = Pick(gateOpen, "Audio/SFX/Gate_Open");
             doorOpen = Pick(doorOpen, "Audio/SFX/Door_Open");
             victory = Pick(victory, "Audio/SFX/Victory");
+            attackReady = Pick(attackReady, "Audio/SFX/Combat_Ready");
         }
 
         private static AudioClip Pick(AudioClip assigned, string resourcePath)
@@ -178,6 +186,7 @@ namespace TheRedDoor.Audio
         private void LateUpdate()
         {
             if (!initialized) return;
+            UpdateSwingReadyTick();
             bool dead = playerHealth.IsDead;
             encounterSeen |= respawnManager.HasArenaCheckpoint ||
                 (keeper.CurrentState != KeeperController.State.Idle && keeper.CurrentState != KeeperController.State.Defeated);
@@ -189,10 +198,14 @@ namespace TheRedDoor.Audio
             battleBlend = Mathf.MoveTowards(battleBlend, !dead && battle && !door.HasOpened ? 1f : 0f, step);
             outroBlend = Mathf.MoveTowards(outroBlend, !dead && outro ? 1f : 0f, step);
             ambienceBlend = Mathf.MoveTowards(ambienceBlend, dead ? 0f : battle ? 0.35f : 1f, step);
-            UpdateLoop(explorationSource, explorationBlend * musicVolume);
-            UpdateLoop(battleSource, battleBlend * musicVolume);
-            UpdateLoop(outroSource, outroBlend * musicVolume);
-            UpdateLoop(ambienceSource, ambienceBlend * ambienceVolume);
+            // The title screen has its own music, and pausing ducks whatever is playing.
+            float menuScale = GameFlowUI.SuppressGameMusic ? 0f : GameFlowUI.MusicDuck;
+            float musicGain = musicVolume * Mathf.Max(1f, musicMakeupGain) * menuScale;
+            float ambienceGain = ambienceVolume * Mathf.Max(1f, ambienceMakeupGain) * menuScale;
+            UpdateLoop(explorationSource, explorationBlend * musicGain);
+            UpdateLoop(battleSource, battleBlend * musicGain);
+            UpdateLoop(outroSource, outroBlend * musicGain);
+            UpdateLoop(ambienceSource, ambienceBlend * ambienceGain);
             playerSource.volume = bossSource.volume = worldSource.volume = stepSource.volume = masterVolume * sfxVolume;
 
             if (!dead && !player.IsControlLocked)
@@ -252,9 +265,20 @@ namespace TheRedDoor.Audio
             lastState = keeper.CurrentState;
         }
 
+        // Rising edge only, and never at rest, so the tick teaches the rhythm instead of nagging.
+        private void UpdateSwingReadyTick()
+        {
+            if (combat == null || attackReady == null)
+                return;
+            bool ready = combat.IsSwingReady;
+            if (ready && !wasSwingReady && swingUsed && !playerHealth.IsDead)
+                Play(playerSource, attackReady, 0.4f);
+            wasSwingReady = ready;
+        }
+
         private void UpdateLoop(AudioSource source, float gain)
         {
-            source.volume = gain * masterVolume;
+            source.volume = Mathf.Clamp01(gain * masterVolume);
             if (source.clip == null) return;
             if (gain > 0f && !source.isPlaying) source.Play();
             else if (gain <= 0f && source.isPlaying) source.Stop();
@@ -273,7 +297,11 @@ namespace TheRedDoor.Audio
             if (footsteps == null || footsteps.Length == 0) return;
             Play(stepSource, footsteps[nextFootstep++ % footsteps.Length], gain, Random.Range(0.94f, 1.06f));
         }
-        private void OnPlayerAttack() => Play(playerSource, swordSwing, 0.65f);
+        private void OnPlayerAttack()
+        {
+            Play(playerSource, swordSwing, 0.65f);
+            swingUsed = true; // Only tick "ready" for a swing the player actually made.
+        }
         private void OnPlayerHit() { if (!playerHealth.IsDead) Play(playerSource, playerHit, 0.85f); }
         private void OnPlayerDeath() => Play(playerSource, playerHit, 0.9f, 0.65f);
         private void OnKeeperHit() { if (!keeperHealth.IsDefeated) Play(bossSource, keeperHit, 0.8f, 0.8f); }

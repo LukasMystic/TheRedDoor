@@ -17,6 +17,17 @@ namespace TheRedDoor.UI
             "A / D or Arrow Keys  Move\nSpace  Jump\nLeft Shift  Air Dash\nJ  Attack";
 
         private bool configured;
+        private bool released;
+
+        // WorldStory takes this label over once the player has read the controls, so the same slot
+        // becomes the objective line instead of a second HUD element competing with it.
+        public TMP_Text ControlsText => controlsText;
+
+        public void ReleaseControl()
+        {
+            released = true;
+            enabled = false;
+        }
 
         private void Awake()
         {
@@ -41,7 +52,7 @@ namespace TheRedDoor.UI
 
         private void OnDisable()
         {
-            if (controlsText != null)
+            if (!released && controlsText != null)
                 controlsText.enabled = false;
         }
 

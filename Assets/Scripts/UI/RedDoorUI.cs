@@ -18,7 +18,7 @@ namespace TheRedDoor.UI
         [Header("Presentation")]
         [SerializeField] private string promptMessage = "Press E to Open";
         [SerializeField, Min(0f)] private float fadeDuration = 0.5f;
-        [SerializeField, TextArea] private string endingMessage = "THE RED DOOR\n\nEnd of proof of concept";
+        [SerializeField, TextArea] private string endingMessage = "THE RED DOOR\n\nEnd of Demo";
 
         private bool configured;
 
@@ -57,9 +57,9 @@ namespace TheRedDoor.UI
 
             interactionPrompt.enabled = door.CanInteract;
             endingOverlay.interactable = false;
-            endingOverlay.blocksRaycasts = door.HasOpened;
+            endingOverlay.blocksRaycasts = door.HasOpened && !GameFlowUI.OwnsEnding;
 
-            if (!door.HasOpened)
+            if (!door.HasOpened || GameFlowUI.OwnsEnding)
             {
                 endingOverlay.alpha = 0f;
                 endingText.enabled = false;

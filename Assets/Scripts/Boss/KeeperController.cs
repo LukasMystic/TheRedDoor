@@ -100,6 +100,25 @@ namespace TheRedDoor.Boss
         [Tooltip("Additional recovery multiplier for an occasional chained attack in Phases 2 and 3.")]
         [SerializeField, Range(0.1f, 1f)] private float chainedRecoveryMultiplier = 0.4f;
 
+        [Header("Difficulty")]
+        [Tooltip("Turns the encounter up for a demo about resilience. Off leaves every authored value exactly as tuned.")]
+        [SerializeField] private bool relentless = true;
+        [Tooltip("Scales every attack warning. Kept close to 1 on purpose: shortening a telegraph past readability makes the fight unfair rather than hard.")]
+        [SerializeField, Range(0.5f, 1f)] private float telegraphScale = 0.76f;
+        [Tooltip("Scales every recovery. This is the real difficulty dial, because recovery is the player's free time.")]
+        [SerializeField, Range(0.25f, 1f)] private float recoveryScale = 0.4f;
+        [Tooltip("Added to every attack's damage, so fewer mistakes are survivable.")]
+        [SerializeField, Min(0)] private int damageBonus = 1;
+        [Tooltip("Attacks between slams and between heavy strikes under Relentless.")]
+        [SerializeField, Min(1)] private int slamIntervalHard = 1;
+        [SerializeField, Min(1)] private int heavyIntervalHard = 2;
+        [Tooltip("Scales how fast the Keeper closes ground while charging and advancing.")]
+        [SerializeField, Range(1f, 2f)] private float closingSpeedScale = 1.18f;
+        [Tooltip("Extra multiplier on the phase two and three recovery windows, on top of Recovery Scale.")]
+        [SerializeField, Range(0.4f, 1f)] private float latePhaseRecoveryScale = 0.8f;
+        [Tooltip("Chain attacks in the later phases: a chained attack gets a much shorter recovery.")]
+        [SerializeField, Min(0)] private int latePhaseChainEvery = 2;
+
         [Header("Flat Arena Limits")]
         [Tooltip("World X limits for the boss ROOT, leaving room for its collider inside the floor edges.")]
         [SerializeField] private Vector2 arenaXLimits = new(-6.5f, 6.5f);
@@ -144,6 +163,17 @@ namespace TheRedDoor.Boss
             public float MovementSpeedMultiplier => Mathf.Max(0.1f, movementSpeedMultiplier);
             public int ChainEveryAttacks => Mathf.Max(0, chainEveryAttacks);
             public int SpecialAttackIntervalReduction => Mathf.Max(0, specialAttackIntervalReduction);
+
+            // Souls-like pressure comes from the later phases: less breathing room, faster closing,
+            // and chains that punish a greedy second swing.
+            internal void Harden(float recoveryMul, float movementMul, int chainEvery)
+            {
+                recoveryMultiplier = Mathf.Max(0.1f, recoveryMultiplier * recoveryMul);
+                movementSpeedMultiplier = Mathf.Max(0.1f, movementSpeedMultiplier * movementMul);
+                if (chainEvery > 0)
+                    chainEveryAttacks = chainEveryAttacks > 0
+                        ? Mathf.Min(chainEveryAttacks, chainEvery) : chainEvery;
+            }
 
             public PhaseTuning(float telegraph, float recovery, float movement, int chainEvery,
                 int specialAttackReduction)
@@ -241,6 +271,49 @@ namespace TheRedDoor.Boss
         {
             if (fitLimitsToFloor)
                 FitLimitsToFloor();
+            if (relentless)
+                ApplyRelentless();
+        }
+
+        // Applied once, to the already-validated values. Telegraphs stay long enough to read; what
+        // shrinks is recovery, which is where the player was previously safe. Every attack also hurts
+        // more, so the fight is lost to mistakes rather than to attrition.
+        private void ApplyRelentless()
+        {
+            float tel = Mathf.Clamp(telegraphScale, 0.5f, 1f);
+            float rec = Mathf.Clamp(recoveryScale, 0.3f, 1f);
+
+            telegraphDuration *= tel;
+            chargeTelegraphDuration *= tel;
+            slamTelegraphDuration *= tel;
+            heavyTelegraphDuration *= tel;
+            heavyWindupDuration *= tel;
+
+            recoveryDuration *= rec;
+            chargeRecoveryDuration *= rec;
+            slamRecoveryDuration *= rec;
+            heavyRecoveryDuration *= rec;
+
+            int bonus = Mathf.Max(0, damageBonus);
+            damage += bonus;
+            chargeDamage += bonus;
+            heavyDamage += bonus;
+
+            attacksBetweenSlams = Mathf.Max(1, slamIntervalHard);
+            attacksBetweenHeavyStrikes = Mathf.Max(1, heavyIntervalHard);
+
+            float closing = Mathf.Clamp(closingSpeedScale, 1f, 2f);
+            chargeSpeed *= closing;
+            heavyStepSpeed *= closing;
+
+            // Phase one stays as authored so the first read of the fight is still teachable; the
+            // pressure ramps in two and three, which is where a souls-like fight is decided.
+            float late = Mathf.Clamp(latePhaseRecoveryScale, 0.4f, 1f);
+            phaseTwo.Harden(late, closing, latePhaseChainEvery);
+            phaseThree.Harden(late * 0.9f, closing, Mathf.Max(1, latePhaseChainEvery - 1));
+
+            // Re-apply, because the active multipliers were cached from the phase before hardening.
+            UpdatePhase(true);
         }
 
         // The hand-set limits were narrower than the arena floor, which left a strip at each end that the

@@ -132,7 +132,7 @@ namespace TheRedDoor.Player
             // Resolved on the first dash rather than every step; the encounter has a single Keeper.
             if (IsDashing && bossCollider == null)
             {
-                KeeperController keeper = FindFirstObjectByType<KeeperController>();
+                KeeperController keeper = FindAnyObjectByType<KeeperController>();
                 if (keeper != null)
                     bossCollider = keeper.GetComponent<Collider2D>();
             }

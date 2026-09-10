@@ -47,6 +47,11 @@ namespace TheRedDoor.Player
         private float bufferedAttackUntil;
 
         public bool IsAttacking => state != AttackState.Ready;
+        // Exposed so the HUD can show the recharge. The window starts at the swing, not after it,
+        // which is why the bar drains through the swing and refills for the short wait afterwards.
+        public float AttackCooldown => Mathf.Max(0.01f, attackCooldown);
+        public float CooldownRemaining => Mathf.Max(0f, nextAttackTime - Time.time);
+        public bool IsSwingReady => state == AttackState.Ready && Time.time >= nextAttackTime;
         public bool IsHitboxActive => state == AttackState.Active;
         public UnityEvent AttackStarted => onAttackStarted;
 

@@ -24,6 +24,7 @@ namespace TheRedDoor.World
         private static Vector2 pendingCheckpointPosition;
 
         public bool IsRestarting => isRestarting;
+        public PlayerHealth PlayerHealth => playerHealth;
         public bool HasArenaCheckpoint => hasArenaCheckpoint;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

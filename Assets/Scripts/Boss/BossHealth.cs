@@ -7,6 +7,8 @@ namespace TheRedDoor.Boss
     public sealed class BossHealth : MonoBehaviour
     {
         [SerializeField, Min(1)] private int maxHealth = 20;
+        [Tooltip("Multiplies Max Health at startup. The demo is about resilience, so the Keeper is meant to outlast several attempts. 1 restores the authored value.")]
+        [SerializeField, Min(0.1f)] private float difficultyHealthScale = 4f;
         [Tooltip("Runtime value. Set Max Health before Play Mode; do not edit Current Health during play.")]
         [SerializeField] private int currentHealth;
 
@@ -21,6 +23,8 @@ namespace TheRedDoor.Boss
         public UnityEvent<int, int> HealthChanged => onHealthChanged;
         public UnityEvent Damaged => onDamaged;
         public UnityEvent Defeated => onDefeated;
+
+        private int baseMaxHealth = -1;
 
         private void Awake()
         {
@@ -46,7 +50,11 @@ namespace TheRedDoor.Boss
 
         public void ResetHealth()
         {
-            maxHealth = Mathf.Max(1, maxHealth);
+            // The authored value is captured once, so repeated resets cannot compound the scale.
+            if (baseMaxHealth < 0)
+                baseMaxHealth = Mathf.Max(1, maxHealth);
+            maxHealth = Mathf.Max(1,
+                Mathf.RoundToInt(baseMaxHealth * Mathf.Max(0.1f, difficultyHealthScale)));
             currentHealth = maxHealth;
             IsDefeated = false;
             onHealthChanged.Invoke(currentHealth, maxHealth);
