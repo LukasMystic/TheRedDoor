@@ -1186,6 +1186,7 @@ MonoBehaviour:
   explorationMusic: {fileID: 8300000, guid: db3caca369b4d441281e9b8c747676a3, type: 3}
   battleMusic: {fileID: 8300000, guid: 32f9e987802844e61aa1d34eac0f87c8, type: 3}
   forestAmbience: {fileID: 8300000, guid: 320dec16598ba4d8bb0b55e3c8f3b46c, type: 3}
+  outroMusic: {fileID: 0}
   musicFadeSeconds: 1.2
   footsteps:
   - {fileID: 8300000, guid: 481dce212159f4f8885ab95d1107146f, type: 3}
@@ -1198,14 +1199,21 @@ MonoBehaviour:
   keeperWindup: {fileID: 8300000, guid: 14b952a116cbd4d298b0d5ed45d96a3e, type: 3}
   keeperSwing: {fileID: 8300000, guid: 31917ea49545d485cbd87be9f9abf74c, type: 3}
   groundSlam: {fileID: 8300000, guid: c735ef5d9f763482e94447252c4a031c, type: 3}
+  heavyStrike: {fileID: 0}
+  keeperRoar: {fileID: 0}
+  keeperDeath: {fileID: 0}
   gateClose: {fileID: 8300000, guid: d4ddc1fff25534dc39c72afa6be2a580, type: 3}
   gateOpen: {fileID: 8300000, guid: c461b82d409b6480dbfef65f1fece6c4, type: 3}
   doorOpen: {fileID: 8300000, guid: d445ca71e32824cd2ae562079f6bf814, type: 3}
   victory: {fileID: 8300000, guid: 97a1b59d9e9ae452aa0b4cf8331024a3, type: 3}
+  attackReady: {fileID: 0}
+  useProcessedClips: 1
   masterVolume: 0.8
   musicVolume: 0.24
   ambienceVolume: 0.12
   sfxVolume: 0.7
+  musicMakeupGain: 3
+  ambienceMakeupGain: 5
 --- !u!4 &284058770
 Transform:
   m_ObjectHideFlags: 0
@@ -6049,6 +6057,10 @@ MonoBehaviour:
   - {fileID: 1489434470654963651, guid: b404b8faf70594d59b2a28e9103d753f, type: 3}
   - {fileID: 173538894772244785, guid: 95c9755b5f167446abddc9a50570a0cf, type: 3}
   - {fileID: -6197983024930244784, guid: d6f183b15c27c498c80d6c5b70acf3e7, type: 3}
+  sloshStrength: 0.5
+  sloshFrequency: 4.6
+  sloshDamping: 3.2
+  idleSway: 0.35
 --- !u!1 &1735056065
 GameObject:
   m_ObjectHideFlags: 0
@@ -7995,6 +8007,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheRedDoor.Boss.BossHealth
   maxHealth: 5
+  difficultyHealthScale: 3
   currentHealth: 0
   onHealthChanged:
     m_PersistentCalls:
@@ -8202,6 +8215,15 @@ MonoBehaviour:
     chainEveryAttacks: 3
     specialAttackIntervalReduction: 1
   chainedRecoveryMultiplier: 0.4
+  relentless: 1
+  telegraphScale: 0.82
+  recoveryScale: 0.55
+  damageBonus: 1
+  slamIntervalHard: 1
+  heavyIntervalHard: 2
+  closingSpeedScale: 1.18
+  latePhaseRecoveryScale: 0.8
+  latePhaseChainEvery: 2
   arenaXLimits: {x: -6.5, y: 6.5}
   fitLimitsToFloor: 1
   collisionSkin: 0.02
@@ -8262,6 +8284,8 @@ MonoBehaviour:
   heavyStrikeStateName: Keeper_HeavyStrike
   deathStateName: Keeper_Death
   crossFadeDuration: 0.05
+  walkReferenceSpeed: 8.1
+  walkSpeedRange: {x: 0.4, y: 1.8}
 --- !u!1001 &5725785860005943220
 PrefabInstance:
   m_ObjectHideFlags: 0
