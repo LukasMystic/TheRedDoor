@@ -7,6 +7,8 @@ using TheRedDoor.UI;
 using TheRedDoor.World;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 // Opt-in, Play-only smoke test. Never saves a scene or invokes Quit.
@@ -49,7 +51,8 @@ public static class GameFlowChecks
         Debug.Log("MENU PASS: " + message);
     }
     static void Click(GameFlowUI flow, string name) => flow.GetComponentsInChildren<Button>()
-        .Single(b => b.name == "Button " + name).onClick.Invoke();
+        .Single(b => string.Equals(b.name, "Button " + name,
+            StringComparison.OrdinalIgnoreCase)).onClick.Invoke();
     static void Tick()
     {
         if (!EditorApplication.isPlaying || EditorApplication.timeSinceStartup < next) return;
@@ -69,6 +72,16 @@ public static class GameFlowChecks
                     Check(Field<AudioClip>(flow, "hoverClip") != null && Field<AudioClip>(flow, "clickClip") != null &&
                         Field<AudioClip>(flow, "backClip") != null, "All three UI sounds loaded");
                     Check(Field<PlayerHealth>(flow, "playerHealth") == health, "Menu uses authoritative health");
+                    var playerInput = player.GetComponent<PlayerInput>();
+                    var uiModule = UnityEngine.Object.FindAnyObjectByType<InputSystemUIInputModule>();
+                    Check(uiModule != null && playerInput != null &&
+                        uiModule.actionsAsset == playerInput.actions,
+                        "Every menu page uses the project's controller-aware UI actions");
+                    Check(uiModule.move != null && uiModule.move.action != null &&
+                        uiModule.move.action.controls.All(control => !(control.device is Joystick)),
+                        "Generic HID navigation is routed through the corrected joystick fallback");
+                    Check(Field<bool>(flow, "invertJoystickMenuVertical"),
+                        "This receiver's reversed joystick Y axis is corrected");
                     startPosition = player.transform.position;
                     ScreenCapture.CaptureScreenshot("/private/tmp/thereddoor-title.png");
                     break;
@@ -106,7 +119,7 @@ public static class GameFlowChecks
                     Check(page == "End" && Time.timeScale == 0, "Door shows end card");
                     ScreenCapture.CaptureScreenshot("/private/tmp/thereddoor-ending.png");
                     break;
-                case 8: Click(flow, "Continue Exploring"); break;
+                case 8: Click(flow, "Keep Looking Around"); break;
                 case 9:
                     Check(page == "None" && !player.IsControlLocked && Time.timeScale == 1, "Continue Exploring restores controls");
                     var legacy = UnityEngine.Object.FindAnyObjectByType<RedDoorUI>();

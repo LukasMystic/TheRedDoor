@@ -4650,8 +4650,8 @@ Transform:
   m_GameObject: {fileID: 1330500639}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -15, y: -7.84, z: 0}
-  m_LocalScale: {x: 10.43, y: 1, z: 1}
+  m_LocalPosition: {x: -15, y: -8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1701543910}
@@ -7192,7 +7192,6 @@ MonoBehaviour:
   endingOverlay: {fileID: 1909760842}
   endingText: {fileID: 909381806}
   promptMessage: <color=#D6BE84>[ E ]</color>  OPEN THE DOOR
-  gamepadPromptMessage: Press {interact} to Open
   fadeDuration: 0.5
   endingMessage: 'THE RED DOOR
 
@@ -7221,14 +7220,6 @@ MonoBehaviour:
 
     <color=#D6BE84>ATTACK</color> 
     J'
-  gamepadMessage: '{move}  Move
-
-    {jump}  Jump
-
-    {dash}  Air Dash
-
-    {attack} 
-    Attack'
 --- !u!1 &1951711988
 GameObject:
   m_ObjectHideFlags: 0
